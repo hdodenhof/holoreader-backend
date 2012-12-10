@@ -14,8 +14,7 @@ import com.google.api.client.json.jackson.JacksonFactory;
 
 public class Utils {
 
-    private static List<String> SCOPES = Arrays.asList("https://www.googleapis.com/auth/userinfo.email",
-            "https://www.googleapis.com/auth/userinfo.profile");
+    private static List<String> SCOPES = Arrays.asList("https://www.googleapis.com/auth/userinfo.email");
 
     static String getRedirectUri(HttpServletRequest req) {
         GenericUrl url = new GenericUrl(req.getRequestURL().toString());
