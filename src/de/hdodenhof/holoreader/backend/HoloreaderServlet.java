@@ -31,9 +31,14 @@ public class HoloreaderServlet extends AbstractAppEngineAuthorizationCodeServlet
         GenericUrl url = new GenericUrl(request.getRequestURL().toString());
         url.setRawPath("/");
         String redirectAfterLogiout = url.build();
+        
+        String eMail = userService.getCurrentUser().getEmail();
+        de.hdodenhof.holoreader.backend.persistence.UserService us = new de.hdodenhof.holoreader.backend.persistence.UserService();
+        UserEntity user = us.get(eMail);
 
         request.setAttribute("name", request.getUserPrincipal().getName());
         request.setAttribute("logoutLink", userService.createLogoutURL(redirectAfterLogiout));
+        request.setAttribute("devicePresent", user != null);
         RequestDispatcher rd = request.getRequestDispatcher("WEB-INF/jsp/holoreader.jsp");
         rd.forward(request, response);
     }
