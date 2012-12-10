@@ -14,7 +14,8 @@ public class GCMService {
             Sender sender = new Sender(APIKEY);
 
             Message.Builder messageBuilder = new Message.Builder();
-            messageBuilder.addData("messageId", data);
+            messageBuilder.addData("type", "addfeed");
+            messageBuilder.addData("data", data);
             Message message = messageBuilder.build();
 
             Result result = sender.send(message, receipient, 5);
