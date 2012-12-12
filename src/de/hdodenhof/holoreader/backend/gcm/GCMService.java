@@ -1,15 +1,17 @@
-package de.hdodenhof.holoreader.backend;
+package de.hdodenhof.holoreader.backend.gcm;
 
 import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 
+import de.hdodenhof.holoreader.backend.exception.GCMException;
+
 public class GCMService {
 
     private static final String APIKEY = "";
 
-    public void sendMessage(String receipient, String data) {
+    public void sendMessage(String receipient, String data) throws GCMException {
         try {
             Sender sender = new Sender(APIKEY);
 
@@ -28,7 +30,7 @@ public class GCMService {
                 // see http://developer.android.com/reference/com/google/android/gcm/server/Constants.html
                 String error = result.getErrorCodeName();
                 if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
-                    // application has been removed from device - unregister database
+                    throw new GCMException();
                 }
             }
         } catch (Exception e) {

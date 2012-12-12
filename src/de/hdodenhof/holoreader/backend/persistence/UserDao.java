@@ -13,8 +13,20 @@ public class UserDao {
     }
 
     public UserEntity findByEmail(String eMail) {
-        Query query = entityManager.createQuery("SELECT u FROM User u WHERE u.eMail = :email").setParameter("email",
-                eMail);
+        Query query = entityManager.createQuery("SELECT u FROM User u WHERE u.eMail = :email").setParameter("email", eMail);
+
+        UserEntity user;
+        try {
+            user = (UserEntity) query.getSingleResult();
+        } catch (NoResultException e) {
+            user = null;
+        }
+
+        return user;
+    }
+
+    public UserEntity findByRegistrationId(String regId) {
+        Query query = entityManager.createQuery("SELECT u FROM User u WHERE u.regId = :regid").setParameter("regid", regId);
 
         UserEntity user;
         try {
@@ -33,7 +45,9 @@ public class UserDao {
     }
 
     public void remove(UserEntity entity) {
+        entityManager.getTransaction().begin();
         entityManager.remove(entity);
+        entityManager.getTransaction().commit();
     }
 
 }

@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<persistence xmlns="http://java.sun.com/xml/ns/persistence"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence         http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence         http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
 
 	<persistence-unit name="transactions-optional">
-		<provider>org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider
-		</provider>
+		<provider>org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider</provider>
 		<properties>
-			<property name="datanucleus.NontransactionalRead" value="true" />
-			<property name="datanucleus.NontransactionalWrite" value="true" />
-			<property name="datanucleus.ConnectionURL" value="appengine" />
+			<property name="datanucleus.NontransactionalRead" value="true"/>
+			<property name="datanucleus.NontransactionalWrite" value="true"/>
+			<property name="datanucleus.ConnectionURL" value="appengine"/>
 
 			<!-- WARNING: Meta-data warning for
 			de.fourinchworks.scotlandyardlive.server.models.*: The datastore does
@@ -19,8 +16,7 @@
 			datanucleus.appengine.ignorableMetaDataBehavior property in your
 			config. A value of NONE will silence the warning. A value of ERROR
 			will turn the warning into an exception. -->
-			<property name="datanucleus.appengine.ignorableMetaDataBehavior"
-				value="NONE" />
+			<property name="datanucleus.appengine.ignorableMetaDataBehavior" value="NONE"/>
 		</properties>
 	</persistence-unit>
 </persistence>

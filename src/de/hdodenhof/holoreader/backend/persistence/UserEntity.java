@@ -15,6 +15,7 @@ public class UserEntity {
     private Key key;
     private String eMail;
     private String regId;
+    private String device;
 
     public Key getKey() {
         return key;
@@ -38,6 +39,14 @@ public class UserEntity {
 
     public void setRegId(String regId) {
         this.regId = regId;
+    }
+
+    public String getDevice() {
+        return device;
+    }
+
+    public void setDevice(String device) {
+        this.device = device;
     }
 
 }

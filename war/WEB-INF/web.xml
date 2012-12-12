@@ -1,28 +1,18 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?><web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
 	<servlet>
-		<servlet-name>Home</servlet-name>
-		<servlet-class>de.hdodenhof.holoreader.backend.HomeServlet</servlet-class>
+		<servlet-name>Holoreader</servlet-name>
+		<servlet-class>de.hdodenhof.holoreader.backend.servlets.HoloreaderServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>Home</servlet-name>
+		<servlet-name>Holoreader</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>Holoreader</servlet-name>
-		<servlet-class>de.hdodenhof.holoreader.backend.HoloreaderServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>Holoreader</servlet-name>
-		<url-pattern>/holoreader</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>oauth2Callback</servlet-name>
-		<servlet-class>de.hdodenhof.holoreader.backend.OAuth2Callback</servlet-class>
+		<servlet-class>de.hdodenhof.holoreader.backend.servlets.OAuth2Callback</servlet-class>
 	</servlet>
-
 	<servlet-mapping>
 		<servlet-name>oauth2Callback</servlet-name>
 		<url-pattern>/oauth2callback/*</url-pattern>
@@ -33,7 +23,7 @@
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>com.sun.jersey.config.property.packages</param-name>
-			<param-value>de.hdodenhof.holoreader.backend.api
+			<param-value>de.hdodenhof.holoreader.backend.servlets.api
 			</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
@@ -42,16 +32,6 @@
 		<servlet-name>API</servlet-name>
 		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
-
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>any</web-resource-name>
-			<url-pattern>/holoreader</url-pattern>
-		</web-resource-collection>
-		<auth-constraint>
-			<role-name>*</role-name>
-		</auth-constraint>
-	</security-constraint>
 
 	<servlet>
 		<servlet-name>SystemServiceServlet</servlet-name>

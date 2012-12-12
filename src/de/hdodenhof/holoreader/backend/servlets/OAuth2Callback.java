@@ -1,6 +1,8 @@
-package de.hdodenhof.holoreader.backend;
+package de.hdodenhof.holoreader.backend.servlets;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,11 +12,18 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.appengine.auth.oauth2.AbstractAppEngineAuthorizationCodeCallbackServlet;
+import com.google.api.client.extensions.appengine.auth.oauth2.AppEngineCredentialStore;
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.appengine.api.users.UserServiceFactory;
 
 public class OAuth2Callback extends AbstractAppEngineAuthorizationCodeCallbackServlet {
 
     private static final long serialVersionUID = 1L;
+
+    private static List<String> SCOPES = Arrays.asList("https://www.googleapis.com/auth/userinfo.email");
 
     @Override
     protected void onSuccess(HttpServletRequest req, HttpServletResponse resp, Credential credential)
@@ -33,11 +42,15 @@ public class OAuth2Callback extends AbstractAppEngineAuthorizationCodeCallbackSe
 
     @Override
     protected String getRedirectUri(HttpServletRequest req) throws ServletException, IOException {
-        return Utils.getRedirectUri(req);
+        GenericUrl url = new GenericUrl(req.getRequestURL().toString());
+        url.setRawPath("/oauth2callback");
+        return url.build();
     }
 
     @Override
     protected AuthorizationCodeFlow initializeFlow() throws IOException {
-        return Utils.newFlow();
+        return new GoogleAuthorizationCodeFlow.Builder(new UrlFetchTransport(), new JacksonFactory(),
+                ".apps.googleusercontent.com", "", SCOPES).setCredentialStore(
+                new AppEngineCredentialStore()).build();
     }
 }
