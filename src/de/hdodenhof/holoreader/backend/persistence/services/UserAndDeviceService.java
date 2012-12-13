@@ -18,12 +18,16 @@ public class UserAndDeviceService {
             user.seteMail(eMail);
         }
 
-        DeviceEntity device = new DeviceEntity();
-        device.setDevice(model);
-        device.setRegId(regId);
+        DeviceDao deviceDao = new DeviceDao();
+        DeviceEntity device = deviceDao.findByRegistrationId(regId);
+        if (device == null) {
+            device = new DeviceEntity();
+            device.setDevice(model);
+            device.setRegId(regId);
 
-        user.getDevices().add(device);
-        userDao.persist(user);
+            user.getDevices().add(device);
+            userDao.persist(user);
+        }
     }
 
     public UserEntity get(String eMail) {

@@ -1,6 +1,5 @@
 package de.hdodenhof.holoreader.backend.persistence.entities;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,7 +15,6 @@ public class DeviceEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Key key;
     private String device;
-    @Column(unique = true, nullable = false)
     private String regId;
 
     public String getWebsaveKey() {
