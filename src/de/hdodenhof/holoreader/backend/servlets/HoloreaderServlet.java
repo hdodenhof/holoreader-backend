@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -28,6 +29,7 @@ import de.hdodenhof.holoreader.backend.exception.GCMException;
 import de.hdodenhof.holoreader.backend.exception.InvalidFeedException;
 import de.hdodenhof.holoreader.backend.gcm.GCMService;
 import de.hdodenhof.holoreader.backend.parser.FeedValidator;
+import de.hdodenhof.holoreader.backend.persistence.entities.DeviceEntity;
 import de.hdodenhof.holoreader.backend.persistence.entities.UserEntity;
 import de.hdodenhof.holoreader.backend.persistence.services.UserAndDeviceService;
 
@@ -108,12 +110,18 @@ public class HoloreaderServlet extends HttpServlet {
                 UserEntity user = us.get(eMail);
 
                 GCMService gcmService = new GCMService();
-                // TODO multiple devices
-                String regId = user.getDevices().get(0).getRegId();
+
+                ArrayList<String> regIds = new ArrayList<String>();
+                String[] devices = request.getParameterValues("devices[]");
+                for (String device : devices) {
+                    // TODO check if device belongs to logged in user
+                    DeviceEntity deviceEntity = us.loadDevice(device);
+                    regIds.add(deviceEntity.getRegId());
+                }
 
                 try {
                     if (resultMap.containsValue(true)) {
-                        gcmService.sendMessage(regId, json.toString());
+                        gcmService.sendMessage(regIds, json.toString());
                     }
                     try {
                         JSONObject responseEntity = new JSONObject();

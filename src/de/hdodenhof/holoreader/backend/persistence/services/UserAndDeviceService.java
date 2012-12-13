@@ -1,5 +1,9 @@
 package de.hdodenhof.holoreader.backend.persistence.services;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+
+import de.hdodenhof.holoreader.backend.persistence.daos.DeviceDao;
 import de.hdodenhof.holoreader.backend.persistence.daos.UserDao;
 import de.hdodenhof.holoreader.backend.persistence.entities.DeviceEntity;
 import de.hdodenhof.holoreader.backend.persistence.entities.UserEntity;
@@ -25,6 +29,12 @@ public class UserAndDeviceService {
     public UserEntity get(String eMail) {
         UserDao userDao = new UserDao();
         return userDao.findByEmail(eMail);
+    }
+
+    public DeviceEntity loadDevice(String keyString) {
+        Key key = KeyFactory.stringToKey(keyString);
+        DeviceDao deviceDao = new DeviceDao();
+        return deviceDao.load(key);
     }
 
 }
