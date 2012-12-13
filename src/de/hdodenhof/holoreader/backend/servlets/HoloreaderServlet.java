@@ -112,7 +112,9 @@ public class HoloreaderServlet extends HttpServlet {
                 String regId = user.getDevices().get(0).getRegId();
 
                 try {
-                    gcmService.sendMessage(regId, json.toString());
+                    if (resultMap.containsValue(true)) {
+                        gcmService.sendMessage(regId, json.toString());
+                    }
                     try {
                         JSONObject responseEntity = new JSONObject();
                         for (Map.Entry<String, Boolean> entry : resultMap.entrySet()) {
@@ -127,6 +129,7 @@ public class HoloreaderServlet extends HttpServlet {
                 } catch (GCMException e) {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 }
+
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             }
