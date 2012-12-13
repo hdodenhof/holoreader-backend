@@ -78,7 +78,8 @@
 	    %>
 	    <div class="alert alert-error">
   		  <b>No device registered!</b><br /><br />
-  		  You need to register your device for push messaging before using this feature. To do so open Holo Reader on your Android device, click the menu button, select "Enable Push Messaging" and follow the on screen instructions.<br /><br />
+  		  You need to register your device for push messaging before using this feature. To do so open Holo Reader on your Android device, click the menu button, select "Enable FeedToDevice" and follow the on screen instructions.<br /><br />
+  		  If you don't have Holo Reader installed yet, <a href="https://play.google.com/store/apps/details?id=de.hdodenhof.holoreader">click here</a> to get to Google Play.<br /><br />  
   		  When you are done click <a href="/holoreader">here</a> to refresh this page.
 	    </div>
 	    <%
