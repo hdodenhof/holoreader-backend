@@ -1,3 +1,6 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="java.util.List" %>
+<%@page import="de.hdodenhof.holoreader.backend.persistence.entities.DeviceEntity" %>
 <!DOCTYPE html>
 <html>
   <head>
@@ -40,7 +43,7 @@
 	        if (((Boolean) request.getAttribute("loggedIn")) == true){
 	    %>
 	    <%
-	        if (((Boolean) request.getAttribute("devicePresent")) != false){
+	        if (((List) request.getAttribute("devices")).size() > 0){
 	    %>
 	    <div id="result">
 	    <div class="alert alert-success" id="success" style="display:none">
@@ -55,10 +58,19 @@
 		<form id="feeduploader">
 		<fieldset>
          <legend>Send feeds to your device</legend>
-         <div id="inputs">
-         <div class="span8"><input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8" name="feeds[]" id="feed_0"/></div>
+         <div id="devices" class="span8" style="margin-bottom: 20px">
+		 <%
+	        for (DeviceEntity device : (List<DeviceEntity>) request.getAttribute("devices")) {
+	     %>
+	    	<div><label class="checkbox"><input type="checkbox" checked="checked" name="devices[]" value="<%= device.getWebsaveKey() %>"> <%= device.getDevice() %></label></div>
+	     <%
+	        }
+	     %>
+		 </div>
+         <div id="inputs" class="span8" style="margin-bottom: 20px">
+         <div><input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8" name="feeds[]" id="feed_0"/></div>
          </div>
-         <div class="span8" style="text-align:right; margin-top:20px"><button id="submit" type="submit" data-loading-text="Sending feeds..." class="btn btn-danger">Send feeds to your device</button></div>
+         <div style="text-align:right;"><button id="submit" type="submit" data-loading-text="Sending feeds..." class="btn btn-danger">Send feeds to your device</button></div>
 		</fieldset>
 		</form>
 	    <%
@@ -91,7 +103,7 @@
 		    var i = $("#feeduploader :input:not(:button)").length;
 		    var nextid = i + 1;
 		    
-		    $("#feeduploader").on('blur', ':input:not(:button)', function(event) {
+		    $("#feeduploader").on('blur', ':input:not(:button):not(:checkbox)', function(event) {
 		    	var emptyFields = 0;
 		 		$("#feeduploader :input:not(:button)").each(function(){
 		 			if (!$(this).val()){
@@ -108,9 +120,9 @@
 		 		/* validate input, if valid URL, send async to server for feed validation */
 			});
 		    
-			$("#feeduploader").on('keyup', ':input:not(:button)', function(event) {
+			$("#feeduploader").on('keyup', ':input:not(:button):not(:checkbox)', function(event) {
 		 		var emptyField = false;
-		 		$("#feeduploader :input:not(:button)").each(function(){
+		 		$("#feeduploader :input:not(:button):not(:checkbox)").each(function(){
 		 			if (!$(this).val()){
 		 			  emptyField = true;
 		 			  return false;
@@ -118,10 +130,31 @@
 		 		});
 		 		
 		 		if (!emptyField){
-		 		    $('<div class="span8" style="display:none;"><input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8" name="feeds[]" id="feed_'+nextid+'"/></div>').appendTo("#inputs").slideDown("fast");
+		 		    $('<div style="display:none;"><input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8" name="feeds[]" id="feed_'+nextid+'"/></div>').appendTo("#inputs").slideDown("fast");
 		 		    nextid++;
 		 		    i++;
 		 		}
+			});
+			
+			$("#devices :checkbox").click(function(){
+			    var checked = false;
+			    $("#devices :checkbox").each(function(){
+			        if($(this).is(':checked')){
+			            checked = true;
+			            return false;
+			        }
+			    });
+			    
+			    if (!checked){
+			        $("#submit").attr("disabled", "disabled");
+			        $("#submit").prop("value", "Select at least one device");
+			        $("#submit").text("Select at least one device");
+			    } else {
+			    	$("#submit").removeAttr("disabled");
+			    	$("#submit").prop("value", "Send feeds to your device");
+			    	$("#submit").text("Send feeds to your device"); 
+			    }
+			    
 			});
 			
 			$("#submit").click(function() {
@@ -153,11 +186,11 @@
 							failure=true;
 						}
 						
-						$("#feeduploader :input:not(:button)").each(function(){
+						$("#feeduploader :input:not(:button):not(:checkbox)").each(function(){
 							$(this).parent().remove();
 				 		});
 				 		
-			 		    $('<div class="span8" style="display:none;"><input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8" name="feeds[]" id="feed_'+nextid+'"/></div>').appendTo("#inputs").slideDown("fast");
+			 		    $('<div style="display:none;"><input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8" name="feeds[]" id="feed_'+nextid+'"/></div>').appendTo("#inputs").slideDown("fast");
 			 		    nextid++;
 			 		    i=1;				 		
 						

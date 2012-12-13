@@ -48,13 +48,13 @@ public class HoloreaderServlet extends HttpServlet {
             String redirectAfterLogout = url.build();
 
             String eMail = userService.getCurrentUser().getEmail();
-            de.hdodenhof.holoreader.backend.persistence.services.UserAndDeviceService us = new de.hdodenhof.holoreader.backend.persistence.services.UserAndDeviceService();
-            UserEntity user = us.get(eMail);
+            UserAndDeviceService userAndDeviceService = new UserAndDeviceService();
+            UserEntity user = userAndDeviceService.get(eMail);
 
             request.setAttribute("loggedIn", true);
             request.setAttribute("name", request.getUserPrincipal().getName());
             request.setAttribute("logoutLink", userService.createLogoutURL(redirectAfterLogout));
-            request.setAttribute("devicePresent", user != null);
+            request.setAttribute("devices", user.getDevices());
         } else {
             String loginUrl = userService.createLoginURL("/");
 

@@ -6,6 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 
 @Entity(name = "Device")
 public class DeviceEntity {
@@ -15,6 +16,10 @@ public class DeviceEntity {
     private Key key;
     private String device;
     private String regId;
+
+    public String getWebsaveKey() {
+        return KeyFactory.keyToString(key);
+    }
 
     public Key getKey() {
         return key;
