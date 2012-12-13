@@ -28,8 +28,8 @@ import de.hdodenhof.holoreader.backend.exception.GCMException;
 import de.hdodenhof.holoreader.backend.exception.InvalidFeedException;
 import de.hdodenhof.holoreader.backend.gcm.GCMService;
 import de.hdodenhof.holoreader.backend.parser.FeedValidator;
-import de.hdodenhof.holoreader.backend.persistence.UserEntity;
-import de.hdodenhof.holoreader.backend.persistence.UserEntityService;
+import de.hdodenhof.holoreader.backend.persistence.entities.UserEntity;
+import de.hdodenhof.holoreader.backend.persistence.services.UserAndDeviceService;
 
 public class HoloreaderServlet extends HttpServlet {
 
@@ -48,7 +48,7 @@ public class HoloreaderServlet extends HttpServlet {
             String redirectAfterLogout = url.build();
 
             String eMail = userService.getCurrentUser().getEmail();
-            de.hdodenhof.holoreader.backend.persistence.UserEntityService us = new de.hdodenhof.holoreader.backend.persistence.UserEntityService();
+            de.hdodenhof.holoreader.backend.persistence.services.UserAndDeviceService us = new de.hdodenhof.holoreader.backend.persistence.services.UserAndDeviceService();
             UserEntity user = us.get(eMail);
 
             request.setAttribute("loggedIn", true);
@@ -66,8 +66,7 @@ public class HoloreaderServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-            IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         UserService userService = UserServiceFactory.getUserService();
 
         if (userService.isUserLoggedIn()) {
@@ -105,11 +104,12 @@ public class HoloreaderServlet extends HttpServlet {
 
                 String eMail = userService.getCurrentUser().getEmail();
 
-                UserEntityService us = new UserEntityService();
+                UserAndDeviceService us = new UserAndDeviceService();
                 UserEntity user = us.get(eMail);
 
                 GCMService gcmService = new GCMService();
-                String regId = user.getRegId();
+                // TODO multiple devices
+                String regId = user.getDevices().get(0).getRegId();
 
                 try {
                     gcmService.sendMessage(regId, json.toString());
@@ -171,7 +171,7 @@ public class HoloreaderServlet extends HttpServlet {
                 UserService userService = UserServiceFactory.getUserService();
                 String eMail = userService.getCurrentUser().getEmail();
 
-                UserEntityService us = new UserEntityService();
+                UserAndDeviceService us = new UserAndDeviceService();
                 UserEntity user = us.get(eMail);
 
                 // GCMService gcmService = new GCMService();

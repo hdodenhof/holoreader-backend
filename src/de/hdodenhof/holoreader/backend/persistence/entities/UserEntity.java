@@ -1,9 +1,15 @@
-package de.hdodenhof.holoreader.backend.persistence;
+package de.hdodenhof.holoreader.backend.persistence.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import com.google.appengine.api.datastore.Key;
 
@@ -14,8 +20,12 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Key key;
     private String eMail;
-    private String regId;
-    private String device;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<DeviceEntity> devices;
+
+    public UserEntity() {
+        devices = new ArrayList<DeviceEntity>();
+    }
 
     public Key getKey() {
         return key;
@@ -33,20 +43,12 @@ public class UserEntity {
         this.eMail = eMail;
     }
 
-    public String getRegId() {
-        return regId;
+    public List<DeviceEntity> getDevices() {
+        return devices;
     }
 
-    public void setRegId(String regId) {
-        this.regId = regId;
-    }
-
-    public String getDevice() {
-        return device;
-    }
-
-    public void setDevice(String device) {
-        this.device = device;
+    public void setDevices(List<DeviceEntity> devices) {
+        this.devices = devices;
     }
 
 }
