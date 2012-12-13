@@ -57,10 +57,15 @@ public class HoloreaderServlet extends HttpServlet {
                 user = userAndDeviceService.storeDummyUser(eMail);
             }
 
+            HashMap<String, String> devices = new HashMap<String, String>();
+            for (DeviceEntity device : user.getDevices()) {
+                devices.put(device.getWebsaveKey(), device.getDevice());
+            }
+
             request.setAttribute("loggedIn", true);
             request.setAttribute("name", request.getUserPrincipal().getName());
             request.setAttribute("logoutLink", userService.createLogoutURL(redirectAfterLogout));
-            request.setAttribute("devices", user.getDevices());
+            request.setAttribute("devices", devices);
         } else {
             String loginUrl = userService.createLoginURL("/");
 
