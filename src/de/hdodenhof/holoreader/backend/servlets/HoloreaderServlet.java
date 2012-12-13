@@ -53,6 +53,10 @@ public class HoloreaderServlet extends HttpServlet {
             UserAndDeviceService userAndDeviceService = new UserAndDeviceService();
             UserEntity user = userAndDeviceService.get(eMail);
 
+            if (user == null) {
+                user = userAndDeviceService.storeDummyUser(eMail);
+            }
+
             request.setAttribute("loggedIn", true);
             request.setAttribute("name", request.getUserPrincipal().getName());
             request.setAttribute("logoutLink", userService.createLogoutURL(redirectAfterLogout));

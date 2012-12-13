@@ -29,7 +29,15 @@ public class UserAndDeviceService {
 
         user.getDevices().add(device);
         userDao.persist(user);
+    }
 
+    public UserEntity storeDummyUser(String eMail) {
+        UserEntity user = new UserEntity();
+        user.seteMail(eMail);
+
+        UserDao userDao = new UserDao();
+        userDao.persist(user);
+        return user;
     }
 
     public UserEntity get(String eMail) {
