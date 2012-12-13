@@ -20,14 +20,16 @@ public class UserAndDeviceService {
 
         DeviceDao deviceDao = new DeviceDao();
         DeviceEntity device = deviceDao.findByRegistrationId(regId);
-        if (device == null) {
-            device = new DeviceEntity();
-            device.setDevice(model);
-            device.setRegId(regId);
-
-            user.getDevices().add(device);
-            userDao.persist(user);
+        if (device != null) {
+            deviceDao.remove(device);
         }
+        device = new DeviceEntity();
+        device.setDevice(model);
+        device.setRegId(regId);
+
+        user.getDevices().add(device);
+        userDao.persist(user);
+
     }
 
     public UserEntity get(String eMail) {
