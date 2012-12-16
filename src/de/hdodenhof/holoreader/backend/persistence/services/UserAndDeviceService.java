@@ -25,7 +25,6 @@ public class UserAndDeviceService {
         if (user == null) {
             user = new UserEntity();
             user.seteMail(eMail);
-            notifyAccountActivation(user);
         }
 
         DeviceDao deviceDao = new DeviceDao();
@@ -39,6 +38,8 @@ public class UserAndDeviceService {
 
         user.getDevices().add(device);
         userDao.persist(user);
+
+        notifyAccountActivation(user, model);
     }
 
     public UserEntity storeDummyUser(String eMail) {
@@ -50,11 +51,11 @@ public class UserAndDeviceService {
         return user;
     }
 
-    private void notifyAccountActivation(UserEntity user) {
+    private void notifyAccountActivation(UserEntity user, String device) {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
 
-        String msgBody = "Hello!\n\nHolo Reader FeedToDevice has been enabled for your account.\n"
+        String msgBody = "Hello!\n\nHolo Reader FeedToDevice has been enabled for your " + device + ".\n"
                 + "You can now go to https://holoreader.appspot.com and send feeds to your device(s).\n\n"
                 + "Please contact holoreader@hdodenhof.de if you have any issue.\n\n" + "Thanks\n" + "Henning";
 
