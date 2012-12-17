@@ -172,6 +172,7 @@ $(document)
         $.each(data, function(key, val) {
           if (val == true) {
             $("#" + key).prop('disabled', true);
+            $("#" + key).parent().removeClass('error');
             $("#" + key).parent().addClass('success');
           } else {
             $("#" + key).parent().addClass('error');
