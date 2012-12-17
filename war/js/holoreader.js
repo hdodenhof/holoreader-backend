@@ -47,6 +47,7 @@ $(document)
 
       $("#submit").click(function() {
         $(this).button('loading');
+        $("#clear").prop('disabled', true);
 
         var data = {};
         data['devices'] = parseDevices();
@@ -178,10 +179,12 @@ $(document)
         });
 
         $("#submit").button('reset');
+        $("#clear").prop('disabled', false);
       }
 
       function postError(jqXHR, textStatus, errorThrown) {
         alert("Something went terribly wrong.\n" + errorThrown);
         $("#submit").button('reset');
+        $("#clear").prop('disabled', false);
       }
     });
