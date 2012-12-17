@@ -48,6 +48,7 @@ $(document)
       $("#submit").click(function() {
         $(this).button('loading');
         $("#clear").prop('disabled', true);
+        resetMessage(true);
 
         var data = {};
         data['devices'] = parseDevices();
@@ -97,8 +98,21 @@ $(document)
       }
 
       function resetForm() {
+        resetMessage();
         resetInputs();
         resetButtons();
+      }
+
+      function resetMessage(instant) {
+        if ($("#error").css("opacity") == '1') {
+          if (instant) {
+            $("#error").css("opacity", "0");
+          } else {
+            $("#error").animate({
+              opacity : 0.0
+            }, 200);
+          }
+        }
       }
 
       function resetButtons() {
@@ -176,6 +190,12 @@ $(document)
             $("#" + key).parent().addClass('success');
           } else {
             $("#" + key).parent().addClass('error');
+
+            if ($("#error").css("opacity") == '0') {
+              $("#error").animate({
+                opacity : 1.0
+              }, 200);
+            }
           }
         });
 

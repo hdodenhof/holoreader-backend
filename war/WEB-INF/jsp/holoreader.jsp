@@ -48,11 +48,15 @@ body {
                         </div>
                       </c:forEach>
                     </div>
-                    <div id="inputs" class="span8" style="margin-bottom: 20px">
+                    <div id="inputs" class="span8" style="margin-bottom: 10px">
                       <div class="control-group">
                         <input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8"
                           name="feeds[]" id="feed_0" />
                       </div>
+                    </div>
+                    <div id="error" style="cursor: default; opacity: 0.0; text-align: right;" class="span8 control-group error">
+                      <div class="control-label">It seems some URLs don't point to a valid feed - these were not
+                        added!</div>
                     </div>
                     <div style="text-align: right;">
                       <button id="clear" type="reset" class="btn btn-danger">Clear</button>
