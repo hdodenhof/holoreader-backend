@@ -2,8 +2,6 @@ package de.hdodenhof.holoreader.backend.servlets;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,13 +13,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
 import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.labs.repackaged.org.json.JSONArray;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONObject;
 
@@ -78,53 +73,34 @@ public class HoloreaderServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json");
+
         UserService userService = UserServiceFactory.getUserService();
 
         if (userService.isUserLoggedIn()) {
-            // TODO use JSON
-            String[] feeds = request.getParameterValues("feeds[]");
-            if (feeds != null) {
-                HashMap<String, Boolean> resultMap = new HashMap<String, Boolean>();
+            StringBuilder sb = new StringBuilder();
+            BufferedReader br = request.getReader();
+            String str;
+            while ((str = br.readLine()) != null) {
+                sb.append(str);
+            }
 
+            String requestEntity = sb.toString();
+
+            ArrayList<Device> devices = parseDevices(requestEntity);
+            ArrayList<Feed> feeds = parseFeeds(requestEntity);
+
+            if (devices != null && feeds != null) {
                 StringBuilder json = new StringBuilder();
-                json.append("[");
-                for (int i = 0; i < feeds.length; i++) {
-                    if (feeds[i].length() > 0) {
-                        // TODO maxlength?
-                        String url = feeds[i];
-                        if (!resultMap.containsKey(url)) {
-                            try {
-                                String title = FeedValidator.validateFeedAndGetTitle(feeds[i]);
-                                json.append("{");
-                                json.append("\"title\":\"" + title + "\"");
-                                json.append(",");
-                                json.append("\"url\":\"" + url + "\"");
-                                json.append("}");
-                                json.append(",");
-                                resultMap.put(title, true);
-                            } catch (InvalidFeedException e) {
-                                resultMap.put(url, false);
-                            }
-                        }
-                    }
-                }
-                if (json.length() > 1) {
-                    json.setLength(json.length() - 1);
-                }
-                json.append("]");
-
-                String eMail = userService.getCurrentUser().getEmail();
+                HashMap<String, Boolean> resultMap = prepareResponse(feeds, json);
 
                 UserAndDeviceService us = new UserAndDeviceService();
-                UserEntity user = us.get(eMail);
 
                 GCMService gcmService = new GCMService();
-
                 ArrayList<String> regIds = new ArrayList<String>();
-                String[] devices = request.getParameterValues("devices[]");
-                for (String device : devices) {
-                    // TODO check if device belongs to logged in user
-                    DeviceEntity deviceEntity = us.loadDevice(device);
+
+                for (Device device : devices) {
+                    DeviceEntity deviceEntity = us.loadDevice(device.id);
                     regIds.add(deviceEntity.getRegId());
                 }
 
@@ -132,74 +108,107 @@ public class HoloreaderServlet extends HttpServlet {
                     if (resultMap.containsValue(true)) {
                         gcmService.sendMessage(regIds, json.toString());
                     }
-                    try {
-                        JSONObject responseEntity = new JSONObject();
-                        for (Map.Entry<String, Boolean> entry : resultMap.entrySet()) {
-                            responseEntity.put(entry.getKey(), entry.getValue());
-                        }
-                        response.setStatus(HttpServletResponse.SC_OK);
-                        response.setContentType("application/json");
-                        response.getWriter().print(responseEntity);
-                    } catch (JSONException e) {
-                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    }
-                } catch (GCMException e) {
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                }
 
+                    JSONObject responseEntity = new JSONObject();
+                    for (Map.Entry<String, Boolean> entry : resultMap.entrySet()) {
+                        responseEntity.put(entry.getKey(), entry.getValue());
+                    }
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().print(responseEntity);
+                } catch (GCMException e) {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                } catch (JSONException e) {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
             } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
         } else {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
 
-    private void extractAndParseMultipart(HttpServletRequest request) {
-        boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-        if (isMultipart) {
-            try {
-                ServletFileUpload upload = new ServletFileUpload();
+    private ArrayList<Feed> parseFeeds(String entity) {
+        ArrayList<Feed> feeds = new ArrayList<Feed>();
 
-                FileItemIterator iterator = upload.getItemIterator(request);
+        try {
+            JSONObject jsonRequest = new JSONObject(entity);
+            JSONArray jsonFeeds = jsonRequest.getJSONArray("feeds");
 
-                String json = "";
+            for (int i = 0; i < jsonFeeds.length(); i++) {
+                JSONObject jsonFeed = jsonFeeds.getJSONObject(i);
 
-                while (iterator.hasNext()) {
-                    FileItemStream item = iterator.next();
-                    InputStream stream = item.openStream();
+                Feed feed = new Feed();
+                feed.id = jsonFeed.getString("inputid");
+                feed.url = jsonFeed.getString("url");
 
-                    if (!item.isFormField()) {
-                        String fieldName = item.getFieldName();
-                        String fileName = item.getName();
-                        String contentType = item.getContentType();
+                feeds.add(feed);
+            }
 
-                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream));
-                        StringBuilder stringBuilder = new StringBuilder();
-                        String line = null;
+        } catch (JSONException e1) {
+            return null;
+        }
 
-                        while ((line = bufferedReader.readLine()) != null) {
-                            stringBuilder.append(line + "\n");
-                        }
+        return feeds;
+    }
 
-                        bufferedReader.close();
-                        json = stringBuilder.toString();
-                        break;
-                    }
+    private ArrayList<Device> parseDevices(String entity) {
+        ArrayList<Device> devices = new ArrayList<Device>();
+
+        try {
+            JSONObject jsonRequest = new JSONObject(entity);
+            JSONArray jsonDevices = jsonRequest.getJSONArray("devices");
+
+            for (int i = 0; i < jsonDevices.length(); i++) {
+                JSONObject jsonDevice = jsonDevices.getJSONObject(i);
+
+                Device device = new Device();
+                device.id = jsonDevice.getString("id");
+
+                devices.add(device);
+            }
+        } catch (JSONException e1) {
+            return null;
+        }
+
+        return devices;
+    }
+
+    private HashMap<String, Boolean> prepareResponse(ArrayList<Feed> feeds, StringBuilder json) {
+        HashMap<String, Boolean> resultMap = new HashMap<String, Boolean>();
+
+        json.append("[");
+        for (Feed feed : feeds) {
+            if (!resultMap.containsKey(feed.id)) {
+                try {
+                    String title = FeedValidator.validateFeedAndGetTitle(feed.url);
+                    json.append("{");
+                    json.append("\"title\":\"" + title + "\"");
+                    json.append(",");
+                    json.append("\"url\":\"" + feed.url + "\"");
+                    json.append("}");
+                    json.append(",");
+                    resultMap.put(feed.id, true);
+                } catch (InvalidFeedException e) {
+                    resultMap.put(feed.id, false);
                 }
-
-                UserService userService = UserServiceFactory.getUserService();
-                String eMail = userService.getCurrentUser().getEmail();
-
-                UserAndDeviceService us = new UserAndDeviceService();
-                UserEntity user = us.get(eMail);
-
-                // GCMService gcmService = new GCMService();
-                // gcmService.sendMessage(user.getRegId(), json);
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             }
         }
+        if (json.length() > 1) {
+            json.setLength(json.length() - 1);
+        }
+        json.append("]");
+
+        return resultMap;
     }
+
+    private class Feed {
+        String id;
+        String url;
+    }
+
+    private class Device {
+        String id;
+    }
+
 }

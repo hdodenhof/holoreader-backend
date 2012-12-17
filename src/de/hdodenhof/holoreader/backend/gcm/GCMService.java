@@ -3,7 +3,6 @@ package de.hdodenhof.holoreader.backend.gcm;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.MulticastResult;
 import com.google.android.gcm.server.Result;
@@ -38,9 +37,7 @@ public class GCMService {
                             String error = results.get(i).getErrorCodeName();
                             if (error != null) {
                                 // see http://developer.android.com/reference/com/google/android/gcm/server/Constants.html
-                                if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
-                                    throw new GCMException();
-                                }
+                                throw new GCMException();
                             }
                         }
                     }

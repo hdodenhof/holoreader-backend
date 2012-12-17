@@ -81,5 +81,4 @@ public class UserAndDeviceService {
         DeviceDao deviceDao = new DeviceDao();
         return deviceDao.load(key);
     }
-
 }

@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -37,16 +37,6 @@ body {
           <c:when test="${loggedIn == true}">
             <c:choose>
               <c:when test="${not empty devices}">
-                <div id="result">
-                  <div class="alert alert-success" id="success" style="display: none">
-                    <h4>The following feeds have been added:</h4>
-                    <ul id="successlist"></ul>
-                  </div>
-                  <div class="alert alert-error" id="failure" style="display: none">
-                    <h4>The following feeds could not be added:</h4>
-                    <ul id="failurelist"></ul>
-                  </div>
-                </div>
                 <form id="feeduploader">
                   <fieldset>
                     <legend>Send feeds to your device</legend>
@@ -59,14 +49,15 @@ body {
                       </c:forEach>
                     </div>
                     <div id="inputs" class="span8" style="margin-bottom: 20px">
-                      <div>
+                      <div class="control-group">
                         <input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8"
                           name="feeds[]" id="feed_0" />
                       </div>
                     </div>
                     <div style="text-align: right;">
-                      <button id="submit" type="submit" data-loading-text="Sending feeds..." class="btn btn-danger">Send
-                        feeds to your device</button>
+                      <button id="clear" type="reset" class="btn btn-danger">Clear</button>
+                      <button id="submit" type="submit" disabled data-loading-text="Sending feeds..."
+                        class="btn btn-primary">Enter at least one URL</button>
                     </div>
                   </fieldset>
                 </form>

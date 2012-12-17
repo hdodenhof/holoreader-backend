@@ -1,48 +1,71 @@
 $(document)
   .ready(
     function() {
-      var i = $("#feeduploader :input:not(:button)").length;
-      var nextid = i + 1;
+      var inputSelector = ":input:not(:button):not(:checkbox)";
+      var inputCount = $("#feeduploader " + inputSelector).length;
+      var nextid = inputCount + 1;
 
-      $("#feeduploader").on('blur', ':input:not(:button):not(:checkbox)', function(event) {
+      $("#feeduploader").on('blur', inputSelector, function(event) {
         var emptyFields = 0;
-        $("#feeduploader :input:not(:button)").each(function() {
+        $("#feeduploader " + inputSelector).each(function() {
           if (!$(this).val()) {
             emptyFields++;
           }
         });
 
         if (!$(this).val() && emptyFields > 1) {
-          $(this).parent().slideUp("fast", function() {
-            $(this).remove();
-          });
-          i--;
+          removeInput($(this));
         }
+
+        validateForm();
       });
 
-      $("#feeduploader")
-        .on(
-          'keyup',
-          ':input:not(:button):not(:checkbox)',
-          function(event) {
-            var emptyField = false;
-            $("#feeduploader :input:not(:button):not(:checkbox)").each(function() {
-              if (!$(this).val()) {
-                emptyField = true;
-                return false;
-              }
-            });
+      $("#feeduploader").on('keyup', inputSelector, function(event) {
+        var emptyField = false;
+        $("#feeduploader " + inputSelector).each(function() {
+          if (!$(this).val()) {
+            emptyField = true;
+            return false;
+          }
+        });
 
-            if (!emptyField) {
-              $(
-                '<div style="display:none;"><input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8" name="feeds[]" id="feed_'
-                  + nextid + '"/></div>').appendTo("#inputs").slideDown("fast");
-              nextid++;
-              i++;
-            }
-          });
+        if (!emptyField) {
+          addInput();
+        }
+
+        validateForm();
+      });
 
       $("#devices :checkbox").click(function() {
+        validateForm();
+      });
+
+      $("#clear").click(function() {
+        resetForm();
+        return false;
+      });
+
+      $("#submit").click(function() {
+        $(this).button('loading');
+
+        var data = {};
+        data['devices'] = parseDevices();
+        data['feeds'] = parseFeeds();
+
+        $.ajax({
+          type : "POST",
+          url : "/",
+          contentType : 'application/json',
+          data : JSON.stringify(data),
+          processData : false,
+          dataType : "json",
+          success : postSuccess,
+          error : postError
+        });
+        return false;
+      });
+
+      function validateForm() {
         var checked = false;
         $("#devices :checkbox").each(function() {
           if ($(this).is(':checked')) {
@@ -51,82 +74,114 @@ $(document)
           }
         });
 
+        var input = false;
+        $("#feeduploader " + inputSelector).each(function() {
+          if ($(this).val()) {
+            input = true;
+            return false;
+          }
+        });
+
         if (!checked) {
-          $("#submit").attr("disabled", "disabled");
+          $("#submit").prop("disabled", true);
           $("#submit").prop("value", "Select at least one device");
           $("#submit").text("Select at least one device");
+        } else if (!input) {
+          resetButtons();
         } else {
-          $("#submit").removeAttr("disabled");
+          $("#submit").prop("disabled", false);
           $("#submit").prop("value", "Send feeds to your device");
           $("#submit").text("Send feeds to your device");
         }
+      }
 
-      });
+      function resetForm() {
+        resetInputs();
+        resetButtons();
+      }
 
-      $("#submit")
-        .click(
-          function() {
-            var btn = $(this);
-            btn.button('loading');
+      function resetButtons() {
+        $("#submit").prop("disabled", true);
+        $("#submit").prop("value", "Enter at least one URL");
+        $("#submit").text("Enter at least one URL");
+      }
 
-            $("#result")
-              .slideUp(
-                "fast",
-                function() {
-                  $("#success").hide();
-                  $("#failure").hide();
+      function resetInputs() {
+        $("#devices :checkbox").each(function() {
+          $(this).prop("checked", true);
+        });
 
-                  $("#successlist").empty();
-                  $("#failurelist").empty();
+        if (inputCount > 1) {
+          removeInputs();
+          addInput();
+        }
+      }
 
-                  var submitdata = $("#feeduploader").serialize();
-                  $
-                    .ajax({
-                      type : "POST",
-                      url : "/",
-                      data : submitdata,
-                      dataType : "json",
-                      success : function(data, status, jqXHR) {
-                        var success = false;
-                        var failure = false;
-                        $
-                          .each(
-                            data,
-                            function(key, val) {
-                              if (val == true) {
-                                $("#successlist").append("<li>" + key + "</li>");
-                                success = true;
-                              } else {
-                                $("#failurelist").append("<li>" + key + "</li>");
-                                failure = true;
-                              }
+      function addInput() {
+        $(
+          '<div class="control-group" style="display:none;"><input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8" name="feeds[]" id="feed_'
+            + nextid + '"/></div>').appendTo("#inputs").slideDown("fast");
+        nextid++;
+        inputCount++;
+      }
 
-                              $("#feeduploader :input:not(:button):not(:checkbox)").each(function() {
-                                $(this).parent().remove();
-                              });
+      function removeInputs() {
+        $("#feeduploader " + inputSelector).each(function() {
+          removeInput($(this));
+        });
+      }
 
-                              $(
-                                '<div style="display:none;"><input type="text" placeholder="http://www.google.com/news/feed.xml" class="span8" name="feeds[]" id="feed_'
-                                  + nextid + '"/></div>').appendTo("#inputs").slideDown("fast");
-                              nextid++;
-                              i = 1;
+      function removeInput(object) {
+        object.parent().slideUp("fast", function() {
+          $(this).remove();
+          inputCount--;
+        });
+      }
 
-                              if (success) {
-                                $("#success").show();
-                              }
-                              if (failure) {
-                                $("#failure").show();
-                              }
-                              $("#result").slideDown("fast");
-                            });
+      function parseDevices() {
+        var devices = new Array();
 
-                        btn.button('reset');
-                      },
-                      error : function(jqXHR, textStatus, errorThrown) {
-                        alert("Something went terribly wrong.\n" + errorThrown);
-                      }
-                    });
-                });
-            return false;
-          });
+        $("#devices :checkbox").each(function() {
+          if ($(this).is(':checked')) {
+            var device = {};
+            device['id'] = $(this).val();
+            devices.push(device);
+          }
+        });
+
+        return devices;
+      }
+
+      function parseFeeds() {
+        var feeds = new Array();
+
+        $("#feeduploader " + inputSelector).each(function() {
+          var url = $(this).val();
+          if (url != "" && $(this).prop('disabled') != true) {
+            var feed = {};
+            feed['url'] = url;
+            feed['inputid'] = $(this).attr('id');
+            feeds.push(feed);
+          }
+        });
+        return feeds;
+      }
+
+      function postSuccess(data, status, jqXHR) {
+        $.each(data, function(key, val) {
+          if (val == true) {
+            $("#" + key).prop('disabled', true);
+            $("#" + key).parent().addClass('success');
+          } else {
+            $("#" + key).parent().addClass('error');
+          }
+        });
+
+        $("#submit").button('reset');
+      }
+
+      function postError(jqXHR, textStatus, errorThrown) {
+        alert("Something went terribly wrong.\n" + errorThrown);
+        $("#submit").button('reset');
+      }
     });
