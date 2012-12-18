@@ -91,9 +91,11 @@ $(document)
         } else if (!input) {
           resetButtons();
         } else {
-          $("#submit").prop("disabled", false);
-          $("#submit").prop("value", "Send feeds to your device");
-          $("#submit").text("Send feeds to your device");
+          if ($("#submit").prop("disabled")) {
+            $("#submit").prop("disabled", false);
+            $("#submit").prop("value", "Send feeds to your device");
+            $("#submit").text("Send feeds to your device");
+          }
         }
       }
 
