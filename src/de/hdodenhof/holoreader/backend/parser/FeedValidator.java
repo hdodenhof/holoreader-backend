@@ -29,6 +29,7 @@ public class FeedValidator {
             URL url = prepareUrl(urlString);
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-agent", "Holo Reader/1.0");
+            connection.setReadTimeout(5000);
             connection.connect();
             String contentType = connection.getContentType();
             if (!contentType.contains("xml")) {
@@ -89,6 +90,8 @@ public class FeedValidator {
             throw new InvalidFeedException("IOEXCEPTION");
         } catch (XmlPullParserException e) {
             throw new InvalidFeedException("XMLPULLPARSEREXCEPTION");
+        } catch (Exception e) {
+            throw new InvalidFeedException();
         }
         return name;
     }
