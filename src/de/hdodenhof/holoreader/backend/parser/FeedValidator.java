@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,6 +16,9 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import de.hdodenhof.holoreader.backend.exception.InvalidFeedException;
 
 public class FeedValidator {
+
+    @SuppressWarnings("unused")
+    private static final Logger logger = Logger.getLogger("FeedValidator");
 
     public static String validateFeedAndGetTitle(String urlString) throws InvalidFeedException {
 
@@ -29,13 +33,35 @@ public class FeedValidator {
             URL url = prepareUrl(urlString);
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-agent", "Holo Reader/1.0");
-            connection.setReadTimeout(5000);
+            connection.setConnectTimeout(2000);
+            connection.setReadTimeout(2000);
             connection.connect();
             String contentType = connection.getContentType();
             if (!contentType.contains("xml")) {
                 throw new InvalidFeedException("NOFEED");
             }
             InputStream inputStream = connection.getInputStream();
+
+            // import static com.google.appengine.api.urlfetch.FetchOptions.Builder.withDefaults;
+            //
+            // URLFetchService fetcher = URLFetchServiceFactory.getURLFetchService();
+            // HTTPResponse response = fetcher.fetch(new HTTPRequest(url, HTTPMethod.GET, withDefaults().disallowTruncate().setDeadline(2d)));
+            //
+            // int responseCode = response.getResponseCode();
+            // if (responseCode != 200) {
+            // throw new InvalidFeedException();
+            // }
+            //
+            // List<HTTPHeader> headers = response.getHeaders();
+            // for (HTTPHeader header : headers) {
+            // if (header.getName().equals("Content-Type")) {
+            // if (!header.getValue().contains("xml")) {
+            // throw new InvalidFeedException("NOFEED");
+            // }
+            // }
+            // }
+            //
+            // InputStream inputStream = new ByteArrayInputStream(response.getContent());
 
             XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
             parserFactory.setNamespaceAware(true);
@@ -53,8 +79,7 @@ public class FeedValidator {
                         currentPrefix = "";
                     }
 
-                    if (currentTag.equalsIgnoreCase("rss") || currentTag.equalsIgnoreCase("feed")
-                            || currentTag.equalsIgnoreCase("rdf")) {
+                    if (currentTag.equalsIgnoreCase("rss") || currentTag.equalsIgnoreCase("feed") || currentTag.equalsIgnoreCase("rdf")) {
                         isFeed = true;
                     } else if (currentTag.equalsIgnoreCase("title") && isFeed && foundName == false) {
                         name = pullParser.nextText();
@@ -64,8 +89,8 @@ public class FeedValidator {
                     } else if (((currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content")) || (currentTag
                             .equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""))) && isArticle == true) {
                         hasContent = true;
-                    } else if ((currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description"))
-                            && isArticle == true && currentPrefix.equalsIgnoreCase("")) {
+                    } else if ((currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description")) && isArticle == true
+                            && currentPrefix.equalsIgnoreCase("")) {
                         hasSummary = true;
                     }
                 } else if (eventType == XmlPullParser.END_TAG) {
@@ -90,7 +115,8 @@ public class FeedValidator {
             throw new InvalidFeedException("IOEXCEPTION");
         } catch (XmlPullParserException e) {
             throw new InvalidFeedException("XMLPULLPARSEREXCEPTION");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
+            // com.google.apphosting.utils.security.urlfetch throws RuntimeExceptions on errors
             throw new InvalidFeedException();
         }
         return name;
@@ -109,7 +135,7 @@ public class FeedValidator {
         if (matcher.matches()) {
             parsedUrl = new URL(url);
         } else {
-            throw new InvalidFeedException("");
+            throw new InvalidFeedException();
         }
 
         return parsedUrl;
