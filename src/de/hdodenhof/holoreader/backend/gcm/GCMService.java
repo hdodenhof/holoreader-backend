@@ -40,7 +40,7 @@ public class GCMService {
                         }
                         String error = results.get(i).getErrorCodeName();
                         // see http://developer.android.com/reference/com/google/android/gcm/server/Constants.html
-                        if (error == Constants.ERROR_NOT_REGISTERED || error == Constants.ERROR_INVALID_REGISTRATION) {
+                        if (error.equals(Constants.ERROR_NOT_REGISTERED) || error.equals(Constants.ERROR_INVALID_REGISTRATION)) {
                             userService.removeDevice(receipients.get(i));
                         } else {
                             // TODO
