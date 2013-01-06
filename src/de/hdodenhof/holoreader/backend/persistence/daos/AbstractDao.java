@@ -32,6 +32,12 @@ public abstract class AbstractDao<E> {
         entityManager.getTransaction().commit();
     }
 
+    public void update(E entity) {
+        entityManager.getTransaction().begin();
+        entityManager.merge(entity);
+        entityManager.getTransaction().commit();
+    }
+
     public E load(Key key) {
         return (E) entityManager.find(entityClass, key);
     }
