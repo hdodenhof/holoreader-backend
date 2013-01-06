@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Holo Reader FeedToDevice</title>
+<title>Holo Reader FeedToDevice (beta)</title>
 <link href="/css/bootstrap.css" rel="stylesheet" media="screen">
 <style>
 body {
@@ -17,16 +17,23 @@ body {
     <div class="navbar-inner">
       <div class="container">
         <span class="brand" style="color: #CC0000;">Holo Reader</span>
-        <c:if test="${loggedIn == true}">
-          <ul class="nav pull-right">
-            <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Logged in as
-                ${name} <b class="caret"></b>
-            </a>
-              <ul class="dropdown-menu">
-                <li><a href="${logoutLink}">Logout</a></li>
-              </ul></li>
-          </ul>
-        </c:if>
+        <c:choose>
+          <c:when test="${loggedIn == true}">
+            <ul class="nav pull-right">
+              <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"> Logged in as
+                  ${name} <b class="caret"></b>
+              </a>
+                <ul class="dropdown-menu">
+                  <li><a href="${logoutLink}">Logout</a></li>
+                </ul></li>
+            </ul>
+          </c:when>
+          <c:otherwise>
+            <ul class="nav pull-right">
+              <li><a href="${loginLink}"> Login </a></li>
+            </ul>
+          </c:otherwise>
+        </c:choose>
       </div>
     </div>
   </div>
@@ -54,7 +61,8 @@ body {
                           name="feeds[]" id="feed_0" />
                       </div>
                     </div>
-                    <div id="error" style="cursor: default; opacity: 0.0; text-align: right;" class="span8 control-group error">
+                    <div id="error" style="cursor: default; opacity: 0.0; text-align: right;"
+                      class="span8 control-group error">
                       <div class="control-label">It seems some URLs don't point to a valid feed - these were not
                         added!</div>
                     </div>
@@ -71,16 +79,22 @@ body {
                   <b>No device registered!</b><br /> <br /> You need to register your device for push messaging before
                   using this feature. To do so open Holo Reader on your Android device, click the menu button, select
                   "Enable FeedToDevice" and follow the on screen instructions.<br /> <br /> If you don't have Holo
-                  Reader installed yet, <a href="https://play.google.com/store/apps/details?id=de.hdodenhof.holoreader">click
-                    here</a> to get to Google Play.<br /> <br /> When you are done click <a href="/">here</a> to refresh
-                  this page.
+                  Reader installed yet, just go to <a
+                    href="https://play.google.com/store/apps/details?id=de.hdodenhof.holoreader">Google Play</a>.<br />
+                  <br /> When you're done, you have to <a href="/">refresh</a> this page.
                 </div>
               </c:otherwise>
             </c:choose>
           </c:when>
           <c:otherwise>
-            <div class="alert alert-error">
-              You need to login with your Google account first, click <a href="${loginLink}">here</a>.
+            <div class="alert alert-info">
+              <b>Welcome to Holo Reader FeedToDevice (beta)!</b><br /> <br /> After logging in with your Google
+              account you can easily add feeds to Holo Reader on your device(s) from any web browser. To login, just
+              click the link in the top right corner.<br /> <br />Please keep in mind that this service is still in
+              its testing stage. I appreciate any feedback via <a
+                href="mailto:holoreader@hdodenhof.de?subject=FeedToDevice">holoreader@hdodenhof.de</a>.<br /> <br />Thanks<br />Henning<br />
+              <br /> <small>P.S. There is a quota limit for using this service as long as it's free. The quota
+                is reset every 24 hours, so if you can't reach this page, please try again later.</small>
             </div>
           </c:otherwise>
         </c:choose>
