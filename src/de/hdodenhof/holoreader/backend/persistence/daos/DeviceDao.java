@@ -20,4 +20,17 @@ public class DeviceDao extends AbstractDao<DeviceEntity> {
         return device;
     }
 
+    public DeviceEntity findByUuid(String uuid) {
+        Query query = entityManager.createQuery("SELECT d FROM Device d WHERE d.uuid = :uuid").setParameter("uuid", uuid);
+
+        DeviceEntity device;
+        try {
+            device = (DeviceEntity) query.getSingleResult();
+        } catch (NoResultException e) {
+            device = null;
+        }
+
+        return device;
+    }
+
 }
