@@ -16,6 +16,7 @@ public class DeviceEntity {
     private Key key;
     private String device;
     private String regId;
+    private String uuid;
 
     public String getWebsaveKey() {
         return KeyFactory.keyToString(key);
@@ -43,6 +44,14 @@ public class DeviceEntity {
 
     public void setRegId(String regId) {
         this.regId = regId;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
 }
