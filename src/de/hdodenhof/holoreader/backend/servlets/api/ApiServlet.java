@@ -20,9 +20,10 @@ public class ApiServlet {
             String eMail = request.getString("eMail");
             String model = request.getString("device");
             String regId = request.getString("regId");
+            String uuid = request.getString("uuid");
 
             UserAndDeviceService userService = new UserAndDeviceService();
-            userService.register(eMail, model, regId);
+            userService.register(eMail, model, regId, uuid);
 
         } catch (JSONException e) {
             e.printStackTrace();

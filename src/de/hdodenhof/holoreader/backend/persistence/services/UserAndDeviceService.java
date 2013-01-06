@@ -19,7 +19,7 @@ import de.hdodenhof.holoreader.backend.persistence.entities.UserEntity;
 
 public class UserAndDeviceService {
 
-    public void register(String eMail, String model, String regId) {
+    public void register(String eMail, String model, String regId, String uuid) {
         UserDao userDao = new UserDao();
         UserEntity user = userDao.findByEmail(eMail);
         if (user == null) {
@@ -32,14 +32,25 @@ public class UserAndDeviceService {
         if (device != null) {
             deviceDao.remove(device);
         }
+
+        boolean uuidExists = false;
+        device = deviceDao.findByUuid(uuid);
+        if (device != null) {
+            uuidExists = true;
+            deviceDao.remove(device);
+        }
+
         device = new DeviceEntity();
         device.setDevice(model);
         device.setRegId(regId);
+        device.setUuid(uuid);
 
         user.getDevices().add(device);
         userDao.persist(user);
 
-        notifyAccountActivation(user, model);
+        if (!uuidExists) {
+            notifyAccountActivation(user, model);
+        }
     }
 
     public UserEntity storeDummyUser(String eMail) {
@@ -56,8 +67,9 @@ public class UserAndDeviceService {
         Session session = Session.getDefaultInstance(props, null);
 
         String msgBody = "Hello!\n\nHolo Reader FeedToDevice has been enabled for your " + device + ".\n"
-                + "You can now go to https://holoreader.appspot.com and send feeds to your device(s).\n\n"
-                + "Please contact holoreader@hdodenhof.de if you have any issue.\n\n" + "Thanks\n" + "Henning";
+                + "You can now go to https://holoreader.appspot.com and send feeds to your device.\n\n"
+                + "Please keep in mind that this service is still in its testing stage. I appreciate "
+                + "any feedback via holoreader@hdodenhof.de.\n\nThanks\nHenning";
 
         try {
             Message msg = new MimeMessage(session);
@@ -80,5 +92,28 @@ public class UserAndDeviceService {
         Key key = KeyFactory.stringToKey(keyString);
         DeviceDao deviceDao = new DeviceDao();
         return deviceDao.load(key);
+    }
+
+    public void updateRegId(String oldRegId, String newRegId) {
+        DeviceDao deviceDao = new DeviceDao();
+        DeviceEntity deviceOldRegId = deviceDao.findByRegistrationId(oldRegId);
+        DeviceEntity deviceNewRegId = deviceDao.findByRegistrationId(newRegId);
+
+        if (deviceOldRegId != null) {
+            if (deviceNewRegId != null) {
+                deviceDao.remove(deviceNewRegId);
+            }
+
+            deviceOldRegId.setRegId(newRegId);
+            deviceDao.update(deviceOldRegId);
+        }
+    }
+
+    public void removeDevice(String regId) {
+        DeviceDao deviceDao = new DeviceDao();
+        DeviceEntity device = deviceDao.findByRegistrationId(regId);
+        if (device != null) {
+            deviceDao.remove(device);
+        }
     }
 }
