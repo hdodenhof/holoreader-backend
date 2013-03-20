@@ -92,7 +92,7 @@ body {
               account you can easily add feeds to Holo Reader on your device(s) from any web browser. To login, just
               click the link in the top right corner.<br /> <br />Please keep in mind that this service is still in
               its testing stage. I appreciate any feedback via <a
-                href="mailto:holoreader@hdodenhof.de?subject=FeedToDevice">holoreader@hdodenhof.de</a>.<br /> <br />Thanks<br />Henning<br />
+                href="mailto:holoreader@hdodenhof.de?subject=FeedToDevice">holoreader@hdodenhof.de</a>.<br /> <br />Thanks<br />
               <br /> <small>P.S. There is a quota limit for using this service as long as it's free. The quota
                 is reset every 24 hours, so if you can't reach this page, please try again later.</small>
             </div>

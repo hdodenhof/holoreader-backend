@@ -66,10 +66,12 @@ public class UserAndDeviceService {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
 
-        String msgBody = "Hello!\n\nHolo Reader FeedToDevice has been enabled for your " + device + ".\n"
+        String msgBody = "Hello!\n\nHolo Reader FeedPusher has been enabled for your " + device + ".\n"
                 + "You can now go to https://holoreader.appspot.com and send feeds to your device.\n\n"
                 + "Please keep in mind that this service is still in its testing stage. I appreciate "
-                + "any feedback via holoreader@hdodenhof.de.\n\nThanks\nHenning";
+                + "any feedback via holoreader@hdodenhof.de.\n\nThanks!\n\n\n"
+                + "P.S. There is a quota limit for using this service as long as it's free. The quota "
+                + "is reset every 24 hours, so if you can't reach the service, please try again later.";
 
         try {
             Message msg = new MimeMessage(session);
