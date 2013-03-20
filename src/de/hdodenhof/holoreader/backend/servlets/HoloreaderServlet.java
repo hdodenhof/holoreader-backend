@@ -181,11 +181,11 @@ public class HoloreaderServlet extends HttpServlet {
         for (Feed feed : feeds) {
             if (!resultMap.containsKey(feed.id)) {
                 try {
-                    String title = FeedValidator.validateFeedAndGetTitle(feed.url);
+                    Map<String, String> result = FeedValidator.parseFeed(feed.url);
                     json.append("{");
-                    json.append("\"title\":\"" + title + "\"");
+                    json.append("\"title\":\"" + result.get(FeedValidator.RESULT_NAME) + "\"");
                     json.append(",");
-                    json.append("\"url\":\"" + feed.url + "\"");
+                    json.append("\"url\":\"" + result.get(FeedValidator.RESULT_URL) + "\"");
                     json.append("}");
                     json.append(",");
                     resultMap.put(feed.id, true);

@@ -5,10 +5,14 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -20,48 +24,82 @@ public class FeedValidator {
     @SuppressWarnings("unused")
     private static final Logger logger = Logger.getLogger("FeedValidator");
 
-    public static String validateFeedAndGetTitle(String urlString) throws InvalidFeedException {
+    public static final String RESULT_NAME = "name";
+    public static final String RESULT_URL = "url";
 
-        String name = "";
-        boolean isFeed = false;
-        boolean isArticle = false;
-        boolean hasContent = false;
-        boolean hasSummary = false;
-        boolean foundName = false;
+    public static Map<String, String> parseFeed(String urlString) throws InvalidFeedException {
+        String resultUrl = urlString;
+        String name = null;
+        String error = null;
 
         try {
             URL url = prepareUrl(urlString);
+
+            logger.info("Working " + url.toString());
+
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-agent", "Holo Reader/1.0");
             connection.setConnectTimeout(2000);
             connection.setReadTimeout(2000);
             connection.connect();
             String contentType = connection.getContentType();
-            if (!contentType.contains("xml")) {
-                throw new InvalidFeedException("NOFEED");
-            }
-            InputStream inputStream = connection.getInputStream();
+            if (contentType.contains("xml")) {
+                logger.info("XML content type detected");
+                InputStream inputStream = connection.getInputStream();
+                try {
+                    name = validateFeedAndExtractName(inputStream);
+                } catch (InvalidFeedException e) {
+                    error = e.getMessage();
+                } finally {
+                    inputStream.close();
+                }
+            } else {
+                logger.info("URL is not a feed!");
+                String alternateUrl = discoverFeed(url);
+                if (alternateUrl == null) {
+                    throw new InvalidFeedException();
+                } else {
+                    URLConnection secondConnection = new URL(alternateUrl).openConnection();
+                    secondConnection.setRequestProperty("User-agent", "Holo Reader/1.0");
+                    secondConnection.setConnectTimeout(2000);
+                    secondConnection.setReadTimeout(2000);
+                    secondConnection.connect();
 
-            // import static com.google.appengine.api.urlfetch.FetchOptions.Builder.withDefaults;
-            //
-            // URLFetchService fetcher = URLFetchServiceFactory.getURLFetchService();
-            // HTTPResponse response = fetcher.fetch(new HTTPRequest(url, HTTPMethod.GET, withDefaults().disallowTruncate().setDeadline(2d)));
-            //
-            // int responseCode = response.getResponseCode();
-            // if (responseCode != 200) {
-            // throw new InvalidFeedException();
-            // }
-            //
-            // List<HTTPHeader> headers = response.getHeaders();
-            // for (HTTPHeader header : headers) {
-            // if (header.getName().equals("Content-Type")) {
-            // if (!header.getValue().contains("xml")) {
-            // throw new InvalidFeedException("NOFEED");
-            // }
-            // }
-            // }
-            //
-            // InputStream inputStream = new ByteArrayInputStream(response.getContent());
+                    InputStream inputStream = secondConnection.getInputStream();
+                    try {
+                        name = validateFeedAndExtractName(inputStream);
+                        resultUrl = alternateUrl;
+                    } catch (InvalidFeedException e) {
+                        error = e.getMessage();
+                    } finally {
+                        inputStream.close();
+                    }
+                }
+            }
+
+            if (name == null) {
+                throw new InvalidFeedException(error);
+            }
+        } catch (IOException e) {
+            throw new InvalidFeedException("IOEXCEPTION");
+        }
+
+        Map<String, String> result = new HashMap<String, String>();
+        result.put(RESULT_NAME, name);
+        result.put(RESULT_URL, resultUrl);
+
+        return result;
+    }
+
+    private static String validateFeedAndExtractName(InputStream inputStream) throws InvalidFeedException {
+        String name = "";
+        boolean foundName = false;
+        boolean isFeed = false;
+        boolean isArticle = false;
+        boolean hasContent = false;
+        boolean hasSummary = false;
+
+        try {
 
             XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
             parserFactory.setNamespaceAware(true);
@@ -102,24 +140,43 @@ public class FeedValidator {
                 }
                 eventType = pullParser.next();
             }
+
             inputStream.close();
-
-            if (isFeed && (hasContent || hasSummary)) {
-
-            } else if (isFeed) {
-                throw new InvalidFeedException("NO_CONTENT");
-            } else {
-                throw new InvalidFeedException("NO_FEED");
-            }
         } catch (IOException e) {
             throw new InvalidFeedException("IOEXCEPTION");
         } catch (XmlPullParserException e) {
             throw new InvalidFeedException("XMLPULLPARSEREXCEPTION");
-        } catch (RuntimeException e) {
-            // com.google.apphosting.utils.security.urlfetch throws RuntimeExceptions on errors
-            throw new InvalidFeedException();
         }
-        return name;
+
+        if (isFeed && (hasContent || hasSummary)) {
+            return name;
+        } else if (isFeed) {
+            throw new InvalidFeedException("NO_CONTENT");
+        } else {
+            throw new InvalidFeedException("NO_FEED");
+        }
+    }
+
+    private static String discoverFeed(URL url) {
+        logger.info("Trying to discover feeds from " + url.toString());
+
+        try {
+            Document document = Jsoup.connect(url.toString()).userAgent("Holo Reader/1.0").timeout(2000).get();
+            String rssUrl = document.select("link[rel=alternate][type=application/rss+xml]").attr("href");
+            if (rssUrl == null || rssUrl == "") {
+                rssUrl = document.select("link[rel=alternate][type=application/atom+xml]").attr("href");
+            }
+
+            logger.info("Found " + rssUrl);
+
+            if (rssUrl == null || rssUrl == "") {
+                return null;
+            } else {
+                return rssUrl;
+            }
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     private static URL prepareUrl(String url) throws MalformedURLException, InvalidFeedException {
