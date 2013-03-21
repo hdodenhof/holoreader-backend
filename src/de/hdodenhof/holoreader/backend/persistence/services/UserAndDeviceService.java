@@ -66,7 +66,7 @@ public class UserAndDeviceService {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
 
-        String msgBody = "Hello!\n\nHolo Reader FeedPusher has been enabled for your " + device + ".\n"
+        String msgBody = "Hello!\n\nHolo Reader FeedPusher (beta) has been enabled for your " + device + ".\n"
                 + "You can now go to https://holoreader.appspot.com and send feeds to your device.\n\n"
                 + "Please keep in mind that this service is still in its testing stage. I appreciate "
                 + "any feedback via holoreader@hdodenhof.de.\n\nThanks!\n\n\n"
@@ -78,7 +78,7 @@ public class UserAndDeviceService {
             msg.setFrom(new InternetAddress("noreply@holoreader.appspotmail.com", "Holo Reader"));
             msg.setReplyTo(new Address[] { new InternetAddress("holoreader@hdodenhof.de") });
             msg.addRecipient(Message.RecipientType.TO, new InternetAddress(user.geteMail()));
-            msg.setSubject("Holo Reader FeedPusher");
+            msg.setSubject("Holo Reader FeedPusher (beta)");
             msg.setText(msgBody);
             Transport.send(msg);
         } catch (Exception e) {
