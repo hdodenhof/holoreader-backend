@@ -39,8 +39,8 @@ public class FeedValidator {
 
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-agent", "Holo Reader/1.0");
-            connection.setConnectTimeout(2000);
-            connection.setReadTimeout(2000);
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
             connection.connect();
             String contentType = connection.getContentType();
             if (contentType.contains("xml")) {
@@ -82,6 +82,8 @@ public class FeedValidator {
             }
         } catch (IOException e) {
             throw new InvalidFeedException("IOEXCEPTION");
+        } catch (Exception e) {
+            throw new InvalidFeedException();
         }
 
         Map<String, String> result = new HashMap<String, String>();
