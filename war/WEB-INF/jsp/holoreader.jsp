@@ -103,6 +103,6 @@ body {
   </div>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
-  <script src="/js/holoreader.js"></script>
+  <script src="/js/holoreader.min.js"></script>
 </body>
 </html>
