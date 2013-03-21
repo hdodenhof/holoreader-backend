@@ -78,7 +78,7 @@ public class UserAndDeviceService {
             msg.setFrom(new InternetAddress("noreply@holoreader.appspotmail.com", "Holo Reader"));
             msg.setReplyTo(new Address[] { new InternetAddress("holoreader@hdodenhof.de") });
             msg.addRecipient(Message.RecipientType.TO, new InternetAddress(user.geteMail()));
-            msg.setSubject("Holo Reader FeedToDevice");
+            msg.setSubject("Holo Reader FeedPusher");
             msg.setText(msgBody);
             Transport.send(msg);
         } catch (Exception e) {

@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Holo Reader FeedToDevice (beta)</title>
+<title>Holo Reader FeedPusher (beta)</title>
 <link href="/css/bootstrap.css" rel="stylesheet" media="screen">
 <style>
 body {
@@ -78,7 +78,7 @@ body {
                 <div class="alert alert-error">
                   <b>No device registered!</b><br /> <br /> You need to register your device for push messaging before
                   using this feature. To do so open Holo Reader on your Android device, click the menu button, select
-                  "Enable FeedToDevice" and follow the on screen instructions.<br /> <br /> If you don't have Holo
+                  "Enable FeedPusher" and follow the on screen instructions.<br /> <br /> If you don't have Holo
                   Reader installed yet, just go to <a
                     href="https://play.google.com/store/apps/details?id=de.hdodenhof.holoreader">Google Play</a>.<br />
                   <br /> When you're done, you have to <a href="/">refresh</a> this page.
@@ -88,11 +88,11 @@ body {
           </c:when>
           <c:otherwise>
             <div class="alert alert-info">
-              <b>Welcome to Holo Reader FeedToDevice (beta)!</b><br /> <br /> After logging in with your Google
+              <b>Welcome to Holo Reader FeedPusher (beta)!</b><br /> <br /> After logging in with your Google
               account you can easily add feeds to Holo Reader on your device(s) from any web browser. To login, just
               click the link in the top right corner.<br /> <br />Please keep in mind that this service is still in
               its testing stage. I appreciate any feedback via <a
-                href="mailto:holoreader@hdodenhof.de?subject=FeedToDevice">holoreader@hdodenhof.de</a>.<br /> <br />Thanks<br />
+                href="mailto:holoreader@hdodenhof.de?subject=FeedPusher">holoreader@hdodenhof.de</a>.<br /> <br />Thanks<br />
               <br /> <small>P.S. There is a quota limit for using this service as long as it's free. The quota
                 is reset every 24 hours, so if you can't reach this page, please try again later.</small>
             </div>
