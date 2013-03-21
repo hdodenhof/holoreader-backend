@@ -57,8 +57,8 @@ body {
                     </div>
                     <div id="inputs" class="span8" style="margin-bottom: 10px">
                       <div class="control-group">
-                        <input type="text" placeholder="e.g. http://rss.cnn.com/rss/edition.rss or just cnn.com" class="span8"
-                          name="feeds[]" id="feed_0" />
+                        <input type="text" placeholder="e.g. http://rss.cnn.com/rss/edition.rss or just cnn.com"
+                          class="span8" name="feeds[]" id="feed_0" />
                       </div>
                     </div>
                     <div id="error" style="cursor: default; opacity: 0.0; text-align: right;"
@@ -88,13 +88,13 @@ body {
           </c:when>
           <c:otherwise>
             <div class="alert alert-info">
-              <b>Welcome to Holo Reader FeedPusher (beta)!</b><br /> <br /> After logging in with your Google
-              account you can easily add feeds to Holo Reader on your device(s) from any web browser. To login, just
-              click the link in the top right corner.<br /> <br />Please keep in mind that this service is still in
-              its testing stage. I appreciate any feedback via <a
-                href="mailto:holoreader@hdodenhof.de?subject=FeedPusher">holoreader@hdodenhof.de</a>.<br /> <br />Thanks<br />
-              <br /> <small>P.S. There is a quota limit for using this service as long as it's free. The quota
-                is reset every 24 hours, so if you can't reach this page, please try again later.</small>
+              <b>Welcome to Holo Reader FeedPusher (beta)!</b><br /> <br /> After logging in with your Google account
+              you can easily add feeds to Holo Reader on your device(s) from any web browser. To login, just click the
+              link in the top right corner.<br /> <br />Please keep in mind that this service is still in its testing
+              stage. I appreciate any feedback via <a href="mailto:holoreader@hdodenhof.de?subject=FeedPusher">holoreader@hdodenhof.de</a>.<br />
+              <br />Thanks!<br /> <br /> <small>P.S. There is a quota limit for using this service as long as
+                it's in its testing stage. The quota is reset every 24 hours, so if you can't reach this page, please
+                try again later.</small>
             </div>
           </c:otherwise>
         </c:choose>
