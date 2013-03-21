@@ -5,7 +5,7 @@
 <html>
 <head>
 <title>Holo Reader FeedPusher (beta)</title>
-<link href="/css/bootstrap.css" rel="stylesheet" media="screen">
+<link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
 <style>
 body {
 	padding-top: 60px;
@@ -102,7 +102,7 @@ body {
     </div>
   </div>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-  <script src="/js/bootstrap.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
   <script src="/js/holoreader.js"></script>
 </body>
 </html>
