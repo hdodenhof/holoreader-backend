@@ -57,7 +57,7 @@ body {
                     </div>
                     <div id="inputs" class="span8" style="margin-bottom: 10px">
                       <div class="control-group">
-                        <input type="text" placeholder="e.g. http://feeds2.feedburner.com/businessinsider or just businesinsider.com" class="span8"
+                        <input type="text" placeholder="e.g. http://rss.cnn.com/rss/edition.rss or just cnn.com" class="span8"
                           name="feeds[]" id="feed_0" />
                       </div>
                     </div>

@@ -136,7 +136,7 @@ $(document)
 
       function addInput() {
         $(
-          '<div class="control-group" style="display:none;"><input type="text" placeholder="e.g. http://feeds2.feedburner.com/businessinsider or just businesinsider.com" class="span8" name="feeds[]" id="feed_'
+          '<div class="control-group" style="display:none;"><input type="text" placeholder="e.g. http://rss.cnn.com/rss/edition.rss or just cnn.com" class="span8" name="feeds[]" id="feed_'
             + nextid + '"/></div>').appendTo("#inputs").slideDown("fast");
         nextid++;
         inputCount++;
