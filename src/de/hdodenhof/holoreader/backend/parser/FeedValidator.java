@@ -33,9 +33,9 @@ public class FeedValidator {
         String error = null;
 
         try {
-            URL url = prepareUrl(urlString);
+            logger.info("[" + urlString + "] Start");
 
-            logger.info("Working on " + url.toString());
+            URL url = prepareUrl(urlString);
 
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-agent", "Holo Reader/1.0");
@@ -44,25 +44,25 @@ public class FeedValidator {
             connection.connect();
             String contentType = connection.getContentType();
             if (contentType.contains("xml")) {
-                logger.info("XML content type detected");
+                logger.info("[" + urlString + "] XML content type detected");
                 InputStream inputStream = connection.getInputStream();
                 try {
                     name = validateFeedAndExtractName(inputStream);
-                    logger.info("Feed " + url.toString() + " is valid!");
+                    logger.info("[" + urlString + "] Feed is valid!");
                 } catch (InvalidFeedException e) {
                     error = e.getMessage();
-                    logger.warning("Feed " + url.toString() + " is invalid!");
+                    logger.warning("[" + urlString + "] Feed is invalid!");
                 } finally {
                     inputStream.close();
                 }
             } else {
-                logger.info("Invalid content type, trying to discover feed");
+                logger.info("[" + urlString + "] Invalid content type, trying to discover feed");
                 String alternateUrl = discoverFeed(url);
                 if (alternateUrl == null) {
-                    logger.warning("No feed discovered, aborting!");
+                    logger.warning("[" + urlString + "] No feed discovered, aborting!");
                     throw new InvalidFeedException();
                 } else {
-                    logger.info("Discovered " + alternateUrl);
+                    logger.info("[" + urlString + "] Discovered " + alternateUrl);
                     URLConnection secondConnection = new URL(alternateUrl).openConnection();
                     secondConnection.setRequestProperty("User-agent", "Holo Reader/1.0");
                     secondConnection.setConnectTimeout(2000);
@@ -72,11 +72,11 @@ public class FeedValidator {
                     InputStream inputStream = secondConnection.getInputStream();
                     try {
                         name = validateFeedAndExtractName(inputStream);
-                        logger.info("Discovered feed " + alternateUrl + " is valid.");
+                        logger.info("[" + urlString + "] Discovered feed is valid.");
                         resultUrl = alternateUrl;
                     } catch (InvalidFeedException e) {
                         error = e.getMessage();
-                        logger.warning("Discovered feed " + alternateUrl + " is invalid!");
+                        logger.warning("[" + urlString + "] Discovered feed is invalid!");
                     } finally {
                         inputStream.close();
                     }
@@ -87,8 +87,13 @@ public class FeedValidator {
                 throw new InvalidFeedException(error);
             }
         } catch (IOException e) {
+            logger.severe("[" + urlString + "] Exception: " + e.getMessage());
             throw new InvalidFeedException("IOEXCEPTION");
+        } catch (InvalidFeedException e) {
+            // no further logging
+            throw new InvalidFeedException();
         } catch (Exception e) {
+            logger.severe("[" + urlString + "] Exception: " + e.getMessage());
             throw new InvalidFeedException();
         }
 
@@ -96,6 +101,7 @@ public class FeedValidator {
         result.put(RESULT_NAME, name);
         result.put(RESULT_URL, resultUrl);
 
+        logger.info("[" + urlString + "] Success: " + resultUrl + " - " + name);
         return result;
     }
 
@@ -166,8 +172,6 @@ public class FeedValidator {
     }
 
     private static String discoverFeed(URL url) {
-        logger.info("Trying to discover feeds from " + url.toString());
-
         try {
             Document document = Jsoup.connect(url.toString()).userAgent("Holo Reader/1.0").timeout(2000).get();
             String rssUrl = document.select("link[rel=alternate][type=application/rss+xml]").attr("href");
@@ -175,12 +179,18 @@ public class FeedValidator {
                 rssUrl = document.select("link[rel=alternate][type=application/atom+xml]").attr("href");
             }
 
-            logger.info("Found " + rssUrl);
-
             if (rssUrl == null || rssUrl == "") {
                 return null;
             } else {
-                return rssUrl;
+                Pattern pattern = PATTERN_WEB;
+                Matcher matcher = pattern.matcher(rssUrl);
+
+                if (matcher.matches()) {
+                    return rssUrl;
+                } else {
+                    logger.info("[" + url + "] Discovered URL (" + rssUrl + ") invalid");
+                    return null;
+                }
             }
         } catch (IOException e) {
             return null;
@@ -188,6 +198,7 @@ public class FeedValidator {
     }
 
     private static URL prepareUrl(String url) throws MalformedURLException, InvalidFeedException {
+        String requestUrl = url;
         URL parsedUrl = null;
 
         if (url.length() < 7 || !url.substring(0, 7).equalsIgnoreCase("http://")) {
@@ -199,8 +210,10 @@ public class FeedValidator {
 
         if (matcher.matches()) {
             parsedUrl = new URL(url);
+            logger.info("[" + requestUrl + "] Parsed URL: " + parsedUrl);
         } else {
-            throw new InvalidFeedException();
+            logger.warning("[" + requestUrl + "] URL invalid, aborting.");
+            throw new InvalidFeedException("URL invalid");
         }
 
         return parsedUrl;
