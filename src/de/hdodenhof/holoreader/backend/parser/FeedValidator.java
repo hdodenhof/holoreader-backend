@@ -35,7 +35,7 @@ public class FeedValidator {
         try {
             URL url = prepareUrl(urlString);
 
-            logger.info("Working " + url.toString());
+            logger.info("Working on " + url.toString());
 
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-agent", "Holo Reader/1.0");
@@ -48,17 +48,20 @@ public class FeedValidator {
                 InputStream inputStream = connection.getInputStream();
                 try {
                     name = validateFeedAndExtractName(inputStream);
+                    logger.info("Feed " + url.toString() + " is valid!");
                 } catch (InvalidFeedException e) {
                     error = e.getMessage();
+                    logger.warning("Feed " + url.toString() + " is invalid!");
                 } finally {
                     inputStream.close();
                 }
             } else {
-                logger.info("URL is not a feed!");
+                logger.info("Invalid content type, trying to discover feed");
                 String alternateUrl = discoverFeed(url);
                 if (alternateUrl == null) {
                     throw new InvalidFeedException();
                 } else {
+                    logger.info("Discovered " + alternateUrl);
                     URLConnection secondConnection = new URL(alternateUrl).openConnection();
                     secondConnection.setRequestProperty("User-agent", "Holo Reader/1.0");
                     secondConnection.setConnectTimeout(2000);
@@ -68,9 +71,11 @@ public class FeedValidator {
                     InputStream inputStream = secondConnection.getInputStream();
                     try {
                         name = validateFeedAndExtractName(inputStream);
+                        logger.info("Discovered feed " + alternateUrl + " is valid.");
                         resultUrl = alternateUrl;
                     } catch (InvalidFeedException e) {
                         error = e.getMessage();
+                        logger.warning("Discovered feed " + alternateUrl + " is invalid!");
                     } finally {
                         inputStream.close();
                     }
