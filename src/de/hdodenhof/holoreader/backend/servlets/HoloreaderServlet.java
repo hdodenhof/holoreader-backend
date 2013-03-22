@@ -100,8 +100,12 @@ public class HoloreaderServlet extends HttpServlet {
                 ArrayList<String> regIds = new ArrayList<String>();
 
                 for (Device device : devices) {
-                    DeviceEntity deviceEntity = us.loadDevice(device.id);
-                    regIds.add(deviceEntity.getRegId());
+                    try {
+                        DeviceEntity deviceEntity = us.loadDevice(device.id);
+                        regIds.add(deviceEntity.getRegId());
+                    } catch (NullPointerException e) {
+                        // device was deleted
+                    }
                 }
 
                 try {
