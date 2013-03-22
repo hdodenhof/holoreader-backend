@@ -2,6 +2,7 @@ package de.hdodenhof.holoreader.backend.gcm;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
@@ -13,6 +14,9 @@ import de.hdodenhof.holoreader.backend.exception.GCMException;
 import de.hdodenhof.holoreader.backend.persistence.services.UserAndDeviceService;
 
 public class GCMService {
+
+    @SuppressWarnings("unused")
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
     private static final String APIKEY = "";
 
@@ -39,11 +43,13 @@ public class GCMService {
                             userService.updateRegId(receipients.get(i), canonicalRegId);
                         }
                         String error = results.get(i).getErrorCodeName();
-                        // see http://developer.android.com/reference/com/google/android/gcm/server/Constants.html
-                        if (error.equals(Constants.ERROR_NOT_REGISTERED) || error.equals(Constants.ERROR_INVALID_REGISTRATION)) {
-                            userService.removeDevice(receipients.get(i));
-                        } else {
-                            // TODO
+                        if (error != null) {
+                            // see http://developer.android.com/reference/com/google/android/gcm/server/Constants.html
+                            if (error.equals(Constants.ERROR_NOT_REGISTERED) || error.equals(Constants.ERROR_INVALID_REGISTRATION)) {
+                                userService.removeDevice(receipients.get(i));
+                            } else {
+                                // TODO
+                            }
                         }
                     }
                 }
