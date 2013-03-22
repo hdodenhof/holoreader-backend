@@ -59,6 +59,7 @@ public class FeedValidator {
                 logger.info("Invalid content type, trying to discover feed");
                 String alternateUrl = discoverFeed(url);
                 if (alternateUrl == null) {
+                    logger.warning("No feed discovered, aborting!");
                     throw new InvalidFeedException();
                 } else {
                     logger.info("Discovered " + alternateUrl);
