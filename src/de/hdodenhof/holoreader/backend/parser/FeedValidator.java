@@ -22,7 +22,7 @@ import de.hdodenhof.holoreader.backend.exception.InvalidFeedException;
 public class FeedValidator {
 
     @SuppressWarnings("unused")
-    private static final Logger logger = Logger.getLogger("FeedValidator");
+    private static final Logger logger = Logger.getLogger(FeedValidator.class.getName());
 
     public static final String RESULT_NAME = "name";
     public static final String RESULT_URL = "url";

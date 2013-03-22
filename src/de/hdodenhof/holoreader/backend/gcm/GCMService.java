@@ -16,7 +16,7 @@ import de.hdodenhof.holoreader.backend.persistence.services.UserAndDeviceService
 public class GCMService {
 
     @SuppressWarnings("unused")
-    private final Logger logger = Logger.getLogger(getClass().getName());
+    private static final Logger logger = Logger.getLogger(GCMService.class.getName());
 
     private static final String APIKEY = "";
 

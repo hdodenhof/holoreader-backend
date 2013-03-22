@@ -33,7 +33,7 @@ public class HoloreaderServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings("unused")
-    private final Logger logger = Logger.getLogger(getClass().getName());
+    private static final Logger logger = Logger.getLogger(HoloreaderServlet.class.getName());
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
