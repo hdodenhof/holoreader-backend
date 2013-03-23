@@ -33,6 +33,7 @@ public class FeedValidator {
         String error = null;
 
         try {
+            urlString = urlString.trim();
             logger.info("[" + urlString + "] Start");
 
             URL url = prepareUrl(urlString);
