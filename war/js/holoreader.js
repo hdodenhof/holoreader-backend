@@ -1,7 +1,7 @@
 $(document)
   .ready(
     function() {
-      var inputSelector = ":input:not(:button):not(:checkbox)";
+      var inputSelector = ":input:not(:button):not(:checkbox):not(:file):not(:hidden)";
       var inputCount = $("#feeduploader " + inputSelector).length;
       var nextid = inputCount + 1;
 
@@ -66,6 +66,16 @@ $(document)
         });
         return false;
       });
+
+      $("#submitopml").fileupload({
+        url: "/",
+        dataType: 'json',
+        done: function (e, data) {
+            $.each(data.result.files, function (index, file) {
+                $('<p/>').text(file.name).appendTo(document.body);
+            });
+        }
+    });
 
       function validateForm() {
         var checked = false;

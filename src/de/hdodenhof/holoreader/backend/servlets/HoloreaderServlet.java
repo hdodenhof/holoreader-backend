@@ -2,8 +2,11 @@ package de.hdodenhof.holoreader.backend.servlets;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -12,6 +15,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.appengine.api.users.UserService;
@@ -24,6 +33,7 @@ import de.hdodenhof.holoreader.backend.exception.GCMException;
 import de.hdodenhof.holoreader.backend.exception.InvalidFeedException;
 import de.hdodenhof.holoreader.backend.gcm.GCMService;
 import de.hdodenhof.holoreader.backend.parser.FeedValidator;
+import de.hdodenhof.holoreader.backend.parser.OPML;
 import de.hdodenhof.holoreader.backend.persistence.entities.DeviceEntity;
 import de.hdodenhof.holoreader.backend.persistence.entities.UserEntity;
 import de.hdodenhof.holoreader.backend.persistence.services.UserAndDeviceService;
@@ -78,55 +88,106 @@ public class HoloreaderServlet extends HttpServlet {
         UserService userService = UserServiceFactory.getUserService();
 
         if (userService.isUserLoggedIn()) {
-            StringBuilder sb = new StringBuilder();
-            BufferedReader br = request.getReader();
-            String str;
-            while ((str = br.readLine()) != null) {
-                sb.append(str);
-            }
-
-            String requestEntity = sb.toString();
-
-            ArrayList<Device> devices = parseDevices(requestEntity);
-            ArrayList<Feed> feeds = parseFeeds(requestEntity);
-
-            if (devices != null && feeds != null) {
-                StringBuilder json = new StringBuilder();
-                HashMap<String, Boolean> resultMap = prepareResponse(feeds, json);
-
-                UserAndDeviceService us = new UserAndDeviceService();
-
-                GCMService gcmService = new GCMService();
-                ArrayList<String> regIds = new ArrayList<String>();
-
-                for (Device device : devices) {
-                    try {
-                        DeviceEntity deviceEntity = us.loadDevice(device.id);
-                        regIds.add(deviceEntity.getRegId());
-                    } catch (NullPointerException e) {
-                        // device was deleted
-                    }
-                }
+            if (ServletFileUpload.isMultipartContent(request)) {
+                Map<String, String> feeds = null;
 
                 try {
-                    if (resultMap.containsValue(true)) {
-                        gcmService.sendMessage(regIds, json.toString());
+                    FileItemFactory factory = new DiskFileItemFactory();
+                    ServletFileUpload upload = new ServletFileUpload(factory);
+                    List<FileItem> items = upload.parseRequest(request);
+
+                    Iterator<FileItem> iter = items.iterator();
+                    while (iter.hasNext()) {
+                        FileItem item = iter.next();
+
+                        if (!item.isFormField()) {
+                            InputStream uploadedStream = item.getInputStream();
+                            feeds = OPML.parse(uploadedStream);
+                            uploadedStream.close();
+                        } else {
+                            if (item.getFieldName().equals("devices")) {
+                                String value = item.getString();
+                            }
+                        }
+                    }
+                } catch (FileUploadException e) {
+                    // TODO
+                }
+
+                if (feeds != null) {
+                    UserAndDeviceService us = new UserAndDeviceService();
+
+                    GCMService gcmService = new GCMService();
+                    ArrayList<String> regIds = new ArrayList<String>();
+
+                    // for (Device device : devices) {
+                    // try {
+                    // DeviceEntity deviceEntity = us.loadDevice(device.id);
+                    // regIds.add(deviceEntity.getRegId());
+                    // } catch (NullPointerException e) {
+                    // // device was deleted
+                    // }
+                    // }
+
+                    try {
+                        gcmService.sendMessage(regIds, prepareOpmlPush(feeds));
+                    } catch (GCMException e) {
+                        // TODO
+                    }
+                }
+
+            } else {
+                StringBuilder sb = new StringBuilder();
+                BufferedReader br = request.getReader();
+                String str;
+                while ((str = br.readLine()) != null) {
+                    sb.append(str);
+                }
+
+                String requestEntity = sb.toString();
+
+                ArrayList<Device> devices = parseDevices(requestEntity);
+                ArrayList<Feed> feeds = parseFeeds(requestEntity);
+
+                if (devices != null && feeds != null) {
+                    StringBuilder json = new StringBuilder();
+                    HashMap<String, Boolean> resultMap = prepareResponse(feeds, json);
+
+                    UserAndDeviceService us = new UserAndDeviceService();
+
+                    GCMService gcmService = new GCMService();
+                    ArrayList<String> regIds = new ArrayList<String>();
+
+                    for (Device device : devices) {
+                        try {
+                            DeviceEntity deviceEntity = us.loadDevice(device.id);
+                            regIds.add(deviceEntity.getRegId());
+                        } catch (NullPointerException e) {
+                            // device was deleted
+                        }
                     }
 
-                    JSONObject responseEntity = new JSONObject();
-                    for (Map.Entry<String, Boolean> entry : resultMap.entrySet()) {
-                        responseEntity.put(entry.getKey(), entry.getValue());
+                    try {
+                        if (resultMap.containsValue(true)) {
+                            gcmService.sendMessage(regIds, json.toString());
+                        }
+
+                        JSONObject responseEntity = new JSONObject();
+                        for (Map.Entry<String, Boolean> entry : resultMap.entrySet()) {
+                            responseEntity.put(entry.getKey(), entry.getValue());
+                        }
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.getWriter().print(responseEntity);
+                    } catch (GCMException e) {
+                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    } catch (JSONException e) {
+                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     }
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().print(responseEntity);
-                } catch (GCMException e) {
-                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                } catch (JSONException e) {
-                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 }
-            } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
+
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
@@ -176,6 +237,25 @@ public class HoloreaderServlet extends HttpServlet {
         }
 
         return devices;
+    }
+
+    private String prepareOpmlPush(Map<String, String> feeds) {
+        StringBuilder json = new StringBuilder();
+        json.append("[");
+        for (Map.Entry<String, String> feed : feeds.entrySet()) {
+            json.append("{");
+            json.append("\"title\":\"" + feed.getKey() + "\"");
+            json.append(",");
+            json.append("\"url\":\"" + feed.getValue() + "\"");
+            json.append("}");
+            json.append(",");
+        }
+        if (json.length() > 1) {
+            json.setLength(json.length() - 1);
+        }
+        json.append("]");
+
+        return json.toString();
     }
 
     private HashMap<String, Boolean> prepareResponse(ArrayList<Feed> feeds, StringBuilder json) {

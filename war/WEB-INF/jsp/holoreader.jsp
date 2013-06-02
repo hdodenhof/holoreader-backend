@@ -6,6 +6,7 @@
 <head>
 <title>Holo Reader FeedPusher (beta)</title>
 <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="/css/bootstrap-fileupload.min.css" rel="stylesheet" media="screen">
 <style>
 body {
 	padding-top: 60px;
@@ -16,8 +17,8 @@ body {
   <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container">
-        <span class="brand" style="color: #CC0000;">Holo Reader</span>
-        <span class="brand" style="margin-left: -30px"><small style="font-size: 12px; color: #999;">v1.0.1</small></span>
+        <span class="brand" style="color: #CC0000;">Holo Reader</span> <span class="brand" style="margin-left: -30px"><small
+          style="font-size: 12px; color: #999;">v1.0.1</small></span>
         <c:choose>
           <c:when test="${loggedIn == true}">
             <ul class="nav pull-right">
@@ -56,21 +57,55 @@ body {
                         </div>
                       </c:forEach>
                     </div>
-                    <div id="inputs" class="span8" style="margin-bottom: 10px">
-                      <div class="control-group">
-                        <input type="text" placeholder="e.g. http://rss.cnn.com/rss/edition.rss or just cnn.com"
-                          class="span8" name="feeds[]" id="feed_0" />
+                    <div class="tabbable">
+                      <ul class="nav nav-tabs">
+                        <li class="active"><a href="#feeds" data-toggle="tab">Feeds</a></li>
+                        <li><a href="#opml" data-toggle="tab">OMPL</a></li>
+                      </ul>
+                      <div class="tab-content">
+                        <div class="tab-pane active" id="feeds">
+                          <div id="inputs" class="span8" style="margin-bottom: 10px">
+                            <div class="control-group">
+                              <input type="text" placeholder="e.g. http://rss.cnn.com/rss/edition.rss or just cnn.com"
+                                class="span8" name="feeds[]" id="feed_0" />
+                            </div>
+                          </div>
+                          <div id="error" style="cursor: default; opacity: 0.0; text-align: right;"
+                            class="span8 control-group error">
+                            <div class="control-label">It seems some URLs don't point to a valid feed - these were
+                              not added!</div>
+                          </div>
+                          <div style="text-align: right;">
+                            <button id="clear" type="reset" class="btn btn-danger">Clear</button>
+                            <button id="submit" type="submit" disabled data-loading-text="Sending feeds..."
+                              class="btn btn-primary">Enter at least one URL</button>
+                          </div>
+                        </div>
+                        <div class="tab-pane" id="opml">
+                          <div class="span8" style="margin-bottom: 10px">
+                            <div class="control-group">
+                              <div class="fileupload fileupload-new" data-provides="fileupload">
+                                <div class="input-append">
+                                  <div class="uneditable-input span6">
+                                    <i class="icon-file fileupload-exists"></i> <span class="fileupload-preview"></span>
+                                  </div>
+                                  <span class="btn btn-file"><span class="fileupload-new">Select file</span><span
+                                    class="fileupload-exists">Change</span><input id="opmlfile" type="file" /></span><a
+                                    href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div id="erroropml" style="cursor: default; opacity: 0.0; text-align: right;"
+                            class="span8 control-group error">
+                            <div class="control-label">Something went wrong</div>
+                          </div>
+                          <div style="text-align: right;">
+                            <button id="submitopml" type="submit" data-loading-text="Sending OPML..."
+                              class="btn btn-primary">Send OPML to your device</button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div id="error" style="cursor: default; opacity: 0.0; text-align: right;"
-                      class="span8 control-group error">
-                      <div class="control-label">It seems some URLs don't point to a valid feed - these were not
-                        added!</div>
-                    </div>
-                    <div style="text-align: right;">
-                      <button id="clear" type="reset" class="btn btn-danger">Clear</button>
-                      <button id="submit" type="submit" disabled data-loading-text="Sending feeds..."
-                        class="btn btn-primary">Enter at least one URL</button>
                     </div>
                   </fieldset>
                 </form>
@@ -104,6 +139,7 @@ body {
   </div>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
-  <script src="/js/holoreader.min.js"></script>
+  <script src="/js/bootstrap-fileupload.min.js"></script>
+  <script src="/js/holoreader.js"></script>
 </body>
 </html>
