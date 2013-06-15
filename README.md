@@ -1,9 +1,9 @@
 Holo Reader Backend
 ===================
 
-Simple backend for Holo Reader to allow pushing feeds to devices.
+Simple AppEngine backend for Holo Reader to allow pushing feeds to devices, see it in action [here][1].
 
-Holo Reader is available on [Google Play][1], its source code is on [GitHub][2].
+Holo Reader is available on [Google Play][2], its source code is on [GitHub][3].
 
 
 API-Access
@@ -30,5 +30,6 @@ License
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-[1]: https://play.google.com/store/apps/details?id=de.hdodenhof.holoreader
-[2]: https://github.com/hdodenhof/holoreader
+[1]: https://holoreader.appspot.com/
+[2]: https://play.google.com/store/apps/details?id=de.hdodenhof.holoreader
+[3]: https://github.com/hdodenhof/holoreader
