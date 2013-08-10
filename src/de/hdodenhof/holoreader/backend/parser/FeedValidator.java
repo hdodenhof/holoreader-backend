@@ -202,7 +202,7 @@ public class FeedValidator {
         String requestUrl = url;
         URL parsedUrl = null;
 
-        if (url.length() < 7 || !url.substring(0, 7).equalsIgnoreCase("http://")) {
+        if (url.length() < 7 || (!url.substring(0, 7).equalsIgnoreCase("http://") && !url.substring(0, 8).equalsIgnoreCase("https://"))) {
             url = "http://" + url;
         }
 
