@@ -17,7 +17,7 @@ body {
     <div class="navbar-inner">
       <div class="container">
         <span class="brand" style="color: #CC0000;">Holo Reader</span>
-        <span class="brand" style="margin-left: -30px"><small style="font-size: 12px; color: #999;">v1.0.1</small></span>
+        <span class="brand" style="margin-left: -30px"><small style="font-size: 12px; color: #999;">v1.0.2</small></span>
         <c:choose>
           <c:when test="${loggedIn == true}">
             <ul class="nav pull-right">
