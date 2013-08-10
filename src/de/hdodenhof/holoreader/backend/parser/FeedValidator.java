@@ -2,6 +2,7 @@ package de.hdodenhof.holoreader.backend.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -37,12 +38,19 @@ public class FeedValidator {
             logger.info("[" + urlString + "] Start");
 
             URL url = prepareUrl(urlString);
+            URLConnection connection = connect(url);
 
-            URLConnection connection = url.openConnection();
-            connection.setRequestProperty("User-agent", "Holo Reader/1.0");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-            connection.connect();
+            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+            int httpResponse = httpConnection.getResponseCode();
+
+            if (httpResponse == HttpURLConnection.HTTP_MOVED_PERM) {
+                String redir = connection.getHeaderField("Location");
+                logger.info("[" + urlString + "] Moved permanently, redirecting to " + redir);
+                url = new URL(redir);
+                connection = connect(url);
+                resultUrl = redir;
+            }
+
             String contentType = connection.getContentType();
             if (contentType.contains("xml")) {
                 logger.info("[" + urlString + "] XML content type detected");
@@ -104,6 +112,16 @@ public class FeedValidator {
 
         logger.info("[" + urlString + "] Success: " + resultUrl + " - " + name);
         return result;
+    }
+
+    public static URLConnection connect(URL url) throws IOException {
+        URLConnection connection = url.openConnection();
+        ((HttpURLConnection) connection).setInstanceFollowRedirects(false);
+        connection.setRequestProperty("User-agent", "Holo Reader/1.0");
+        connection.setConnectTimeout(5000);
+        connection.setReadTimeout(5000);
+        connection.connect();
+        return connection;
     }
 
     private static String validateFeedAndExtractName(InputStream inputStream) throws InvalidFeedException {
