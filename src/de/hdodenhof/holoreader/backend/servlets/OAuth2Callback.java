@@ -8,6 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import de.hdodenhof.holoreader.backend.Config;
+
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.Credential;
@@ -50,7 +52,7 @@ public class OAuth2Callback extends AbstractAppEngineAuthorizationCodeCallbackSe
     @Override
     protected AuthorizationCodeFlow initializeFlow() throws IOException {
         return new GoogleAuthorizationCodeFlow.Builder(new UrlFetchTransport(), new JacksonFactory(),
-                ".apps.googleusercontent.com", "", SCOPES).setCredentialStore(
+                Config.OAUTH_CLIENTID, Config.OAUTH_CLIENTSECRET, SCOPES).setCredentialStore(
                 new AppEngineCredentialStore()).build();
     }
 }

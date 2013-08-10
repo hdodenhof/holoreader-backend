@@ -10,6 +10,7 @@ import com.google.android.gcm.server.MulticastResult;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 
+import de.hdodenhof.holoreader.backend.Config;
 import de.hdodenhof.holoreader.backend.exception.GCMException;
 import de.hdodenhof.holoreader.backend.persistence.services.UserAndDeviceService;
 
@@ -18,12 +19,10 @@ public class GCMService {
     @SuppressWarnings("unused")
     private static final Logger logger = Logger.getLogger(GCMService.class.getName());
 
-    private static final String APIKEY = "";
-
     public void sendMessage(ArrayList<String> receipients, String data) throws GCMException {
         if (receipients.size() > 0) {
             try {
-                Sender sender = new Sender(APIKEY);
+                Sender sender = new Sender(Config.GCM_APIKEY);
 
                 Message.Builder messageBuilder = new Message.Builder();
                 messageBuilder.addData("type", "addfeed");
