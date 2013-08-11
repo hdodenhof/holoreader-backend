@@ -67,12 +67,11 @@ public class FeedValidator {
                 }
             } else {
                 logger.info("[" + urlString + "] Invalid content type, trying to discover feed");
-                String alternateUrl = discoverFeed(url);
+                String alternateUrl = discoverFeed(url, urlString);
                 if (alternateUrl == null) {
                     logger.warning("[" + urlString + "] No feed discovered, aborting!");
                     throw new InvalidFeedException();
                 } else {
-                    logger.info("[" + urlString + "] Discovered " + alternateUrl);
                     URLConnection secondConnection = new URL(alternateUrl).openConnection();
                     secondConnection.setRequestProperty("User-agent", "Holo Reader/1.0");
                     secondConnection.setConnectTimeout(2000);
@@ -191,7 +190,7 @@ public class FeedValidator {
         }
     }
 
-    private static String discoverFeed(URL url) {
+    private static String discoverFeed(URL url, String logTag) {
         try {
             Document document = Jsoup.connect(url.toString()).userAgent("Holo Reader/1.0").timeout(2000).get();
             String rssUrl = document.select("link[rel=alternate][type=application/rss+xml]").attr("href");
@@ -202,13 +201,24 @@ public class FeedValidator {
             if (rssUrl == null || rssUrl == "") {
                 return null;
             } else {
+                if (rssUrl.length() < 7 || (!rssUrl.substring(0, 7).equalsIgnoreCase("http://") && !rssUrl.substring(0, 8).equalsIgnoreCase("https://"))) {
+                    String protocol = url.getProtocol();
+                    String host = url.getHost();
+                    if (rssUrl.substring(0, 1).equalsIgnoreCase("/")) {
+                        rssUrl = protocol + "://" + host + rssUrl;
+                    } else {
+                        rssUrl = protocol + "://" + host + "/" + rssUrl;
+                    }
+                }
+
                 Pattern pattern = WEB_URL;
                 Matcher matcher = pattern.matcher(rssUrl);
 
                 if (matcher.matches()) {
+                    logger.info("[" + logTag + "] Discovered URL: " + rssUrl);
                     return rssUrl;
                 } else {
-                    logger.info("[" + url + "] Discovered URL (" + rssUrl + ") invalid");
+                    logger.info("[" + logTag + "] Discovered URL (" + rssUrl + ") invalid");
                     return null;
                 }
             }
