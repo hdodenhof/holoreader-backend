@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -96,13 +97,13 @@ public class FeedValidator {
                 throw new InvalidFeedException(error);
             }
         } catch (IOException e) {
-            logger.severe("[" + urlString + "] Exception: " + e.getMessage());
+            logger.log(Level.SEVERE, "[" + urlString + "] Exception: " + e.getMessage(), e);
             throw new InvalidFeedException("IOEXCEPTION");
         } catch (InvalidFeedException e) {
             // no further logging
             throw new InvalidFeedException();
         } catch (Exception e) {
-            logger.severe("[" + urlString + "] Exception: " + e.getMessage());
+            logger.log(Level.SEVERE, "[" + urlString + "] Exception: " + e.getMessage(), e);
             throw new InvalidFeedException();
         }
 
